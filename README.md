@@ -2,11 +2,12 @@
 
 - 🌱 I’m currently learning Python, Java. In Python, I mainly learn data analysis and discord bot development.
 
-- 📝 I regularly write articles on : Coming soon...
+- 📝 I regularly write articles on : 74k4-lab.com
 
 - 📫 How to reach me **iam74k4@gmail.com**
 
-- 📄 Know about my experiences : Coming soon...
+- 📄 Know about my experiences : 74k4-lab.com
+- 
 
 <h3 align="left">Connect with me:</h3>
 <p align="left">
