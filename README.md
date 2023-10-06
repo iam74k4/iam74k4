@@ -4,12 +4,12 @@ Hi, My name is Taka. I'm 23 years old and a university student.
 I am researching AI, mainly learning about natural language processing.
 
 ## Tech Stack
-### OS
+### ・OS
 ![Windows](https://img.shields.io/badge/-Windows-black.svg?logo=windows&style=for-the-badge&logoColor=blue)
 ![Linux](https://img.shields.io/badge/-Linux-black.svg?logo=linux&style=for-the-badge)
 ![Ubuntu](https://img.shields.io/badge/-Ubuntu-black.svg?logo=ubuntu&style=for-the-badge)
 
-### Language
+### ・Language
 ![Python](https://img.shields.io/badge/-Python-black.svg?logo=python&style=for-the-badge)
 ![Java](https://img.shields.io/badge/-Java-black.svg?logo=java&style=for-the-badge)
 ![PHP](https://img.shields.io/badge/-Php-black.svg?logo=php&style=for-the-badge)
@@ -17,14 +17,14 @@ I am researching AI, mainly learning about natural language processing.
 ![CSS3](https://img.shields.io/badge/-Css3-black.svg?logo=css3&style=for-the-badge&logoColor=lightblue)
 ![JavaScript](https://img.shields.io/badge/-Javascript-black.svg?logo=javascript&style=for-the-badge)
 
-### Middleware
+### ・Middleware
 ![Nginx](https://img.shields.io/badge/-Nginx-black.svg?logo=nginx&style=for-the-badge&logoColor=green)
 ![MySQL](https://img.shields.io/badge/-Mysql-black.svg?logo=mysql&style=for-the-badge)
 
-### Framework
+### ・Framework
 ![Django](https://img.shields.io/badge/-Django-black.svg?logo=django&style=for-the-badge&logoColor=darkgreen)
 
-### Cloud, Editor, etc.
+### ・Cloud, Editor, etc.
 ![Google Cloud](https://img.shields.io/badge/-Google%20cloud-black.svg?logo=google-cloud&style=for-the-badge)
 ![Docker](https://img.shields.io/badge/-Docker-black.svg?logo=docker&style=for-the-badge)
 ![VSCode](https://img.shields.io/badge/-VSCODE-black.svg?logo=visualstudiocode&style=for-the-badge&logoColor=blue)
@@ -35,10 +35,8 @@ I am researching AI, mainly learning about natural language processing.
 [![AppleMusic](https://img.shields.io/badge/-Apple%20music-black.svg?logo=apple-music&style=for-the-badge&logoColor=red)](https://music.apple.com/profile/iam74k4)
 
 ## Status
-<a href="https://github.com/anuraghazra/github-readme-stats">
-  <img align="left" src="https://github-readme-stats.vercel.app/api?username=iam74k4&count_private=true&theme=chartreuse-dark&show_icons=true" />
-</a>
+<!--![Top Languages Card](https://github-readme-stats.vercel.app/api/top-langs/?username=iam74k4)-->
+<!--![GitHub Stats Card](https://github-readme-stats.vercel.app/api?username=iam74k4)-->
 
-<a href="https://github.com/anuraghazra/github-readme-stats">
-  <img align="left" src="https://github-readme-stats.vercel.app/api/top-langs/?username=iam74k4&theme=chartreuse-dark" />
-</a>
+![Profile Views](https://komarev.com/ghpvc/?username=iam74k4&style=for-the-badge&color=grey)
+[![Profile Followers](https://img.shields.io/github/followers/iam74k4?label=Followers&style=for-the-badge&color=grey)](https://github.com/iam74k4)
