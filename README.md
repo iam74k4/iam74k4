@@ -1,5 +1,9 @@
-## Tech Stack
+## About Me
+Hi, My name is Taka. I'm 23 years old and a university student. 
 
+I am researching AI, mainly learning about natural language processing.
+
+## Tech Stack
 ### OS
 ![Windows](https://img.shields.io/badge/-Windows-black.svg?logo=windows&style=for-the-badge&logoColor=blue)
 ![Linux](https://img.shields.io/badge/-Linux-black.svg?logo=linux&style=for-the-badge)
@@ -9,7 +13,6 @@
 ![Python](https://img.shields.io/badge/-Python-black.svg?logo=python&style=for-the-badge)
 ![Java](https://img.shields.io/badge/-Java-black.svg?logo=java&style=for-the-badge)
 ![PHP](https://img.shields.io/badge/-Php-black.svg?logo=php&style=for-the-badge)
-
 ![HTML5](https://img.shields.io/badge/-Html5-black.svg?logo=html5&style=for-the-badge)
 ![CSS3](https://img.shields.io/badge/-Css3-black.svg?logo=css3&style=for-the-badge&logoColor=lightblue)
 ![JavaScript](https://img.shields.io/badge/-Javascript-black.svg?logo=javascript&style=for-the-badge)
@@ -30,8 +33,6 @@
 [![Discord](https://img.shields.io/badge/-Discord-black.svg?logo=discord&style=for-the-badge)](https://discord.com/users/569686218632331264)
 [![Twitter](https://img.shields.io/badge/-Twitter-black.svg?logo=twitter&style=for-the-badge)](https://twitter.com/iam74k4)
 [![AppleMusic](https://img.shields.io/badge/-Apple%20music-black.svg?logo=apple-music&style=for-the-badge&logoColor=red)](https://music.apple.com/profile/iam74k4)
-
-
 
 ## Status
 <a href="https://github.com/anuraghazra/github-readme-stats">
