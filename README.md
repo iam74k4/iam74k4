@@ -32,11 +32,7 @@ I am researching AI, mainly learning about natural language processing.
 ## Connect with Me
 [![Discord](https://img.shields.io/badge/-Discord-black.svg?logo=discord&style=for-the-badge)](https://discord.com/users/569686218632331264)
 [![Twitter](https://img.shields.io/badge/-Twitter-black.svg?logo=twitter&style=for-the-badge)](https://twitter.com/iam74k4)
-[![AppleMusic](https://img.shields.io/badge/-Apple%20music-black.svg?logo=apple-music&style=for-the-badge&logoColor=red)](https://music.apple.com/profile/iam74k4)
 
-## Status
+<!--## Status-->
 <!--![Top Languages Card](https://github-readme-stats.vercel.app/api/top-langs/?username=iam74k4)-->
 <!--![GitHub Stats Card](https://github-readme-stats.vercel.app/api?username=iam74k4)-->
-
-![Profile Views](https://komarev.com/ghpvc/?username=iam74k4&style=for-the-badge&color=grey)
-[![Profile Followers](https://img.shields.io/github/followers/iam74k4?label=Followers&style=for-the-badge&color=grey)](https://github.com/iam74k4)
