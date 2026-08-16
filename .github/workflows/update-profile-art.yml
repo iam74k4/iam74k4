@@ -1,6 +1,7 @@
 name: Update profile art
 
-# Refreshes the contribution graph SVG daily from real data.
+# Refreshes the commit-activity graph SVG daily from real data
+# (GitHub REST API only -- no scraping, no third-party services).
 # Runs daily, plus whenever you push to main, plus on-demand.
 
 "on":
@@ -13,6 +14,12 @@ name: Update profile art
 permissions:
   contents: write
 
+# a scheduled run overlapping a push-triggered run would race the
+# auto-commit push; keep one refresh in flight at a time
+concurrency:
+  group: update-profile-art
+  cancel-in-progress: true
+
 jobs:
   heatmap:
     runs-on: ubuntu-latest
@@ -23,17 +30,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        run: pip install -r scripts/requirements.txt
+      # both scripts are stdlib-only; no pip install needed
 
-      - name: Scrape real contribution data (no auth needed)
-        run: python scripts/fetch_contributions.py
+      - name: Aggregate commit activity from the GitHub API
+        run: python scripts/fetch_commit_activity.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Render animated contribution graph SVG
-        run: python scripts/generate_streak_svg.py iam74k4 contrib-heatmap.svg
+      - name: Render animated commit-activity SVG
+        run: python scripts/generate_streak_svg.py data/commit-activity.json contrib-heatmap.svg
 
       - name: Commit updated art
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: refresh contribution graph [skip ci]"
-          file_pattern: "data/contributions.json contrib-heatmap.svg"
+          commit_message: "chore: refresh commit-activity graph [skip ci]"
+          file_pattern: "data/commit-activity.json contrib-heatmap.svg"

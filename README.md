@@ -5,7 +5,8 @@
      monospace type.
      portrait:  python scripts/make_ascii_svg.py
      wordmark:  python scripts/make_wordmark_svg.py --mode rock
-     heatmap:   python scripts/generate_streak_svg.py   (daily via Actions)
+     heatmap:   python scripts/fetch_commit_activity.py
+                && python scripts/generate_streak_svg.py   (daily via Actions)
      links:     python scripts/make_links_svg.py
      profile-art concept inspired by github.com/AVIVASHISHTA29 -->
 
@@ -16,7 +17,7 @@
 </tr>
 </table>
 
-<img src="./contrib-heatmap.svg" width="860" alt="Taka's GitHub contribution graph — auto-refreshed daily" />
+<img src="./contrib-heatmap.svg" width="860" alt="Taka's commit activity over the last year — auto-refreshed daily" />
 
 <br>
 <br>

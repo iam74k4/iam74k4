@@ -1,28 +1,17 @@
 #!/usr/bin/env python3
-"""Generate an animated GitHub-contribution SVG (squares light up one by one).
-Works standalone; designed to run in a GitHub Action daily to stay live.
-Usage: python generate_streak_svg.py [username] [output.svg]
-Adapted from AVIVASHISHTA29/AVIVASHISHTA29.
+"""Generate an animated commit-activity SVG (squares light up one by one).
+Reads data/commit-activity.json, written by fetch_commit_activity.py --
+fully offline, no third-party APIs. Run daily by a GitHub Action to stay live.
+Usage: python generate_streak_svg.py [data.json] [output.svg]
+Animation style adapted from AVIVASHISHTA29/AVIVASHISHTA29.
 """
-import sys, json, os, datetime, urllib.request
+import sys, json, os, datetime
 
-USER = sys.argv[1] if len(sys.argv) > 1 else "iam74k4"
-OUT  = sys.argv[2] if len(sys.argv) > 2 else "contrib-heatmap.svg"
+HERE = os.path.dirname(os.path.abspath(__file__))
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "data", "commit-activity.json")
+OUT = sys.argv[2] if len(sys.argv) > 2 else "contrib-heatmap.svg"
 
-def get_data(user):
-    url = f"https://github-contributions-api.jogruber.de/v4/{user}?y=last"
-    try:
-        with urllib.request.urlopen(url, timeout=25) as r:
-            return json.loads(r.read().decode())
-    except Exception as e:
-        # fallback to the local snapshot if the API is unreachable
-        here = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "contrib.json")
-        if os.path.exists(here):
-            print("API failed (%s); using local data/contrib.json" % e)
-            return json.load(open(here))
-        raise
-
-data = get_data(USER)
+data = json.load(open(SRC))
 contribs = data["contributions"]
 total = data["total"]["lastYear"]
 
@@ -99,11 +88,11 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewB
 <rect x="0.5" y="0.5" width="{W-1}" height="{H-1}" rx="12" fill="none" stroke="{FRAME}"/>
 <line x1="0" y1="{TITLEBAR_H}" x2="{W}" y2="{TITLEBAR_H}" stroke="{FRAME}"/>
 {dots}
-<text x="{W/2:.0f}" y="{TITLEBAR_H/2 + 4}" fill="{GRAY}" font-size="12" text-anchor="middle">taka@github: ~$ ./contributions.sh</text>
+<text x="{W/2:.0f}" y="{TITLEBAR_H/2 + 4}" fill="{GRAY}" font-size="12" text-anchor="middle">taka@github: ~$ ./commits.sh --last-year</text>
 {''.join(labels)}
 {''.join(rects)}
-<text x="{GX+LEFT}" y="{H-16:.0f}" font-size="13"><tspan fill="{GREEN}" font-weight="700">{total:,}</tspan><tspan fill="{INK}"> contributions in the last year</tspan></text>
+<text x="{GX+LEFT}" y="{H-16:.0f}" font-size="13"><tspan fill="{GREEN}" font-weight="700">{total:,}</tspan><tspan fill="{INK}"> commits in the last year</tspan></text>
 </svg>'''
 
 open(OUT, "w").write(svg)
-print(f"Wrote {OUT}: {n} days, {total:,} contributions, {len(svg)//1024} KB")
+print(f"Wrote {OUT}: {n} days, {total:,} commits, {len(svg)//1024} KB")

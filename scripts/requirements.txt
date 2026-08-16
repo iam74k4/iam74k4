@@ -1,4 +1,4 @@
-requests==2.32.3
-beautifulsoup4==4.12.3
+# local art generation only (make_ascii_svg.py / make_wordmark_svg.py);
+# the daily workflow scripts are stdlib-only and need no installs
 Pillow==12.1.1
 numpy==1.26.4
