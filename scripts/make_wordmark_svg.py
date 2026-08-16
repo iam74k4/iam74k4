@@ -86,6 +86,7 @@ BG2 = "#111722"
 FRAME = "#30363d"
 TITLE_TEXT = "#7d8590"
 INK = "#c9d1d9"
+GREEN = "#39d353"    # accent: the same green as the contribution heatmap
 
 PAD = 18
 TITLEBAR_H = 28
@@ -291,11 +292,12 @@ def emit(frames, mode, out, dur, reveal):
         line by line once the wipe finishes. begin<0 renders it frozen."""
         sep_y = TITLEBAR_H + art_h + PAD * 0.55
         rows = [f'<line x1="0" y1="{sep_y:.1f}" x2="{canvas_w:.0f}" y2="{sep_y:.1f}" stroke="{FRAME}"/>']
-        texts = [(f'<tspan fill="{TITLE_TEXT}">taka@github: ~$ </tspan>'
-                  f'<tspan fill="{INK}">cat about.yml</tspan>')]
+        prompt = (f'<tspan fill="{GREEN}">taka@github</tspan>'
+                  f'<tspan fill="{TITLE_TEXT}">:~$ </tspan>')
+        texts = [prompt + f'<tspan fill="{INK}">cat about.yml</tspan>']
         texts += [(f'<tspan fill="{TITLE_TEXT}">{k}: </tspan><tspan fill="{INK}">{html.escape(v)}</tspan>')
                   for k, v in FOOTER_LINES]
-        texts.append(f'<tspan fill="{TITLE_TEXT}">taka@github: ~$</tspan>')
+        texts.append(prompt)
         for i, body in enumerate(texts):
             y = sep_y + 16 + i * FOOTER_LINE_H
             x = PAD + (18 if 0 < i <= len(FOOTER_LINES) else 0)
@@ -307,7 +309,7 @@ def emit(frames, mode, out, dur, reveal):
                             f'<set attributeName="opacity" to="1" begin="{t:.2f}s"/></text>')
         cy = sep_y + 16 + (len(texts) - 1) * FOOTER_LINE_H
         blink_begin = "0s" if begin < 0 else f"{begin + (len(texts) - 1) * 0.18:.2f}s"
-        rows.append(f'<rect x="{PAD + 122}" y="{cy - 11:.1f}" width="8" height="14" fill="{INK}" '
+        rows.append(f'<rect x="{PAD + 122}" y="{cy - 11:.1f}" width="8" height="14" fill="{GREEN}" '
                     f'opacity="0"><animate attributeName="opacity" values="1;1;0;0" '
                     f'keyTimes="0;0.5;0.51;1" dur="1s" begin="{blink_begin}" '
                     f'repeatCount="indefinite"/></rect>')

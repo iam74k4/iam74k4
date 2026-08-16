@@ -54,7 +54,8 @@ BG2 = "#111722"
 FRAME = "#30363d"
 TITLE_TEXT = "#7d8590"
 INK = "#c9d1d9"      # the single ascii color
-CURSOR = "#c9d1d9"
+GREEN = "#39d353"    # accent: the same green as the contribution heatmap
+CURSOR = GREEN
 
 # ---- reveal timing (one-shot; a cursor rasters top -> bottom) -------------
 ROW_DUR = 0.11
@@ -139,8 +140,9 @@ for ry, line in enumerate(rows_txt):
 status_line_y = TITLEBAR_H + ART_H + PAD * 0.35
 status_y = status_line_y + 19
 parts.append(f'<line x1="0" y1="{status_line_y:.1f}" x2="{CANVAS_W}" y2="{status_line_y:.1f}" stroke="{FRAME}"/>')
-parts.append(f'<text x="{PAD}" y="{status_y:.1f}" fill="{TITLE_TEXT}" font-size="13">'
-             f'taka@github:~$ whoami <tspan fill="{INK}">Taka</tspan></text>')
+parts.append(f'<text x="{PAD}" y="{status_y:.1f}" font-size="13">'
+             f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{TITLE_TEXT}">:~$ </tspan>'
+             f'<tspan fill="{INK}">whoami </tspan><tspan fill="{GREEN}">Taka</tspan></text>')
 parts.append(f'<rect x="{PAD+206}" y="{status_y-12:.1f}" width="8" height="14" fill="{INK}">'
              f'<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.5;0.51;1" '
              f'dur="1s" repeatCount="indefinite"/></rect>')
