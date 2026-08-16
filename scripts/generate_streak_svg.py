@@ -73,6 +73,20 @@ for i, c in enumerate(contribs):
 dots = "".join(f'<circle cx="{PAD + i*16}" cy="{TITLEBAR_H/2}" r="5" fill="{c}"/>'
                for i, c in enumerate(["#ff5f56", "#ffbd2e", "#27c93f"]))
 
+# streak stats (right-aligned in the bottom line), when the data has them
+stats = data.get("stats")
+if stats:
+    stats_text = (
+        f'<text x="{GX+GW-6}" y="{H-16:.0f}" font-size="13" text-anchor="end">'
+        f'<tspan fill="{INK}">streak </tspan><tspan fill="{GREEN}" font-weight="700">{stats["current_streak"]}d</tspan>'
+        f'<tspan fill="{GRAY}"> · </tspan>'
+        f'<tspan fill="{INK}">longest </tspan><tspan fill="{GREEN}" font-weight="700">{stats["longest_streak"]}d</tspan>'
+        f'<tspan fill="{GRAY}"> · </tspan>'
+        f'<tspan fill="{INK}">max </tspan><tspan fill="{GREEN}" font-weight="700">{stats["best_day"]}</tspan>'
+        f'<tspan fill="{INK}">/day</tspan></text>')
+else:
+    stats_text = ""
+
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">
 <style>
   text.lbl {{ fill:{GRAY}; font-size:13px; font-weight:600; }}
@@ -92,6 +106,7 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewB
 {''.join(labels)}
 {''.join(rects)}
 <text x="{GX+LEFT}" y="{H-16:.0f}" font-size="13"><tspan fill="{GREEN}" font-weight="700">{total:,}</tspan><tspan fill="{INK}"> commits in the last year</tspan></text>
+{stats_text}
 </svg>'''
 
 open(OUT, "w").write(svg)

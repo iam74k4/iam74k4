@@ -88,6 +88,23 @@ def count_commits(repo, counts):
         page += 1
 
 
+def streaks(days):
+    """(current, longest) run of consecutive active days. Today doesn't
+    break the current streak while it's still in progress."""
+    longest = run = 0
+    for d in days:
+        run = run + 1 if d["count"] > 0 else 0
+        longest = max(longest, run)
+    idx = len(days) - 1
+    if days[idx]["count"] == 0:
+        idx -= 1
+    current = 0
+    while idx >= 0 and days[idx]["count"] > 0:
+        current += 1
+        idx -= 1
+    return current, longest
+
+
 def quartile_level(n, nonzero):
     if n == 0 or not nonzero:
         return 0
@@ -124,8 +141,13 @@ if __name__ == "__main__":
         d += datetime.timedelta(days=1)
 
     total = sum(x["count"] for x in days)
+    current, longest = streaks(days)
+    best = max(days, key=lambda x: x["count"])
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w") as f:
-        json.dump({"total": {"lastYear": total}, "contributions": days}, f)
+        json.dump({"total": {"lastYear": total},
+                   "stats": {"current_streak": current, "longest_streak": longest,
+                             "best_day": best["count"]},
+                   "contributions": days}, f)
     print(f"wrote {OUT_PATH}: {total} commits across "
           f"{sum(1 for x in days if x['count'])} active days, {len(repos)} repos")

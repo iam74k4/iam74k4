@@ -7,8 +7,8 @@
      wordmark:  python scripts/make_wordmark_svg.py --mode rock
      heatmap:   python scripts/fetch_commit_activity.py
                 && python scripts/generate_streak_svg.py   (daily via Actions)
-     links:     python scripts/make_links_svg.py
-     profile-art concept inspired by github.com/AVIVASHISHTA29 -->
+     stack:     python scripts/make_stack_svg.py
+     links:     python scripts/make_links_svg.py -->
 
 <table>
 <tr>
@@ -19,15 +19,13 @@
 
 <img src="./contrib-heatmap.svg" width="860" alt="Taka's commit activity over the last year — auto-refreshed daily" />
 
+<img src="./stack.svg" width="860" alt="Tech stack" />
+
 <br>
 <br>
 
 [![Email](./links-mail.svg)](mailto:iam74k4@gmail.com)
 [![Discord](./links-discord.svg)](https://discord.com/users/569686218632331264)
 [![Instagram](./links-instagram.svg)](https://www.instagram.com/iam74k4)
-
-<br>
-
-<sub>profile art inspired by <a href="https://github.com/AVIVASHISHTA29">@AVIVASHISHTA29</a></sub>
 
 </div>

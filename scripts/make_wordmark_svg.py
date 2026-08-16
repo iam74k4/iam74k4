@@ -45,8 +45,18 @@ CELL_W = 9.0
 CELL_H = 15.5
 # FreeSans Bold: even stroke weight keeps the shading consistent across a
 # glyph, and the digits' counters survive the extrusion at this resolution.
-FONT_PATH = os.environ.get(
-    "WORDMARK_FONT", "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf")
+# Falls back to whichever bold sans this machine has.
+FONT_CANDIDATES = [
+    os.environ.get("WORDMARK_FONT", ""),
+    "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",       # debian/ubuntu
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",                       # macos
+    "C:/Windows/Fonts/arialbd.ttf",                              # windows
+]
+FONT_PATH = next((p for p in FONT_CANDIDATES if p and os.path.exists(p)), None)
+if FONT_PATH is None:
+    raise SystemExit("no bold TTF found -- set WORDMARK_FONT to a bold font file")
 FONT_INDEX = int(os.environ.get("WORDMARK_FONT_INDEX", 0))   # face within a .ttc
 # "74K4" -- TAKA in leetspeak, matching the @iam74k4 handle.
 TEXT = os.environ.get("WORDMARK_TEXT", "74K4")
