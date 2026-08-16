@@ -1,69 +1,44 @@
-![Header](https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:161b22,100:30363d&height=180&section=header&text=Taka&fontSize=42&fontColor=c9d1d9&animation=twinkling&fontAlignY=32&desc=System%20Engineer&descAlignY=52&descSize=18)
+<div align="center">
 
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=58A6FF&random=false&width=600&lines=Welcome+to+my+GitHub+Profile;Developing+Discord+Bots;Developing+AI;Analyzing+Financial+Data)](https://git.io/typing-svg)
+<!-- hero: monochrome ASCII portrait (types in) beside the extruded 3d ascii
+     wordmark (wipes in left-to-right, then rocks on its vertical axis).
+     widths are picked so both panels land at the same height.
+     portrait:  python scripts/make_ascii_svg.py
+     wordmark:  python scripts/make_wordmark_svg.py --mode rock
+     profile-art concept inspired by github.com/AVIVASHISHTA29 -->
 
-![Views](https://komarev.com/ghpvc/?username=iam74k4&color=30363d&style=flat-square&label=Views)
+<h3><code>taka@github ~ $ whoami</code></h3>
 
----
+<table>
+<tr>
+<td valign="top"><img src="./taka-ascii.svg" width="370" alt="Taka — ASCII portrait" /></td>
+<td valign="top"><img src="./wordmark.svg" width="490" alt="74K4 — 3D ASCII wordmark" /></td>
+</tr>
+</table>
 
-## About Me
+<br>
+<br>
 
-```yaml
-name: Taka
-role: System Engineer
-education: Artificial Intelligence (Natural Language Processing)
-interests:
-  - Discord Bot Development
-  - Financial Data Analysis
-location: Japan
-```
+<!-- animated contribution graph: real data, boxes reveal cell by cell
+     (regenerated daily by .github/workflows/update-profile-art.yml) -->
 
----
+<h3><code>taka@github ~ $ ./contributions.sh</code></h3>
 
-## Tech Stack
+<img src="./contrib-heatmap.svg" width="860" alt="Taka's GitHub contribution graph — auto-refreshed daily" />
 
-### Languages
-![Python](https://img.shields.io/badge/-Python-0d1117.svg?logo=python&style=for-the-badge&logoColor=58a6ff)
-![C#](https://img.shields.io/badge/-C%23-0d1117.svg?logo=csharp&style=for-the-badge&logoColor=a371f7)
-![Java](https://img.shields.io/badge/-Java-0d1117.svg?logo=openjdk&style=for-the-badge&logoColor=58a6ff)
-![PHP](https://img.shields.io/badge/-PHP-0d1117.svg?logo=php&style=for-the-badge&logoColor=a371f7)
-![JavaScript](https://img.shields.io/badge/-JavaScript-0d1117.svg?logo=javascript&style=for-the-badge&logoColor=58a6ff)
-![HTML5](https://img.shields.io/badge/-HTML5-0d1117.svg?logo=html5&style=for-the-badge&logoColor=a371f7)
-![CSS3](https://img.shields.io/badge/-CSS3-0d1117.svg?logo=css3&style=for-the-badge&logoColor=58a6ff)
+<br>
+<br>
 
-### Frameworks & Infrastructure
-![.NET](https://img.shields.io/badge/-.NET-0d1117.svg?logo=dotnet&style=for-the-badge&logoColor=a371f7)
-![Django](https://img.shields.io/badge/-Django-0d1117.svg?logo=django&style=for-the-badge&logoColor=3fb950)
-![Docker](https://img.shields.io/badge/-Docker-0d1117.svg?logo=docker&style=for-the-badge&logoColor=58a6ff)
-![Google Cloud](https://img.shields.io/badge/-Google%20Cloud-0d1117.svg?logo=googlecloud&style=for-the-badge&logoColor=58a6ff)
-![Nginx](https://img.shields.io/badge/-Nginx-0d1117.svg?logo=nginx&style=for-the-badge&logoColor=3fb950)
-![MySQL](https://img.shields.io/badge/-MySQL-0d1117.svg?logo=mysql&style=for-the-badge&logoColor=58a6ff)
+<h3><code>taka@github ~ $ ./links.sh</code></h3>
 
-### Environment
-![Windows](https://img.shields.io/badge/-Windows-0d1117.svg?logo=windows11&style=for-the-badge&logoColor=58a6ff)
-![Linux](https://img.shields.io/badge/-Linux-0d1117.svg?logo=linux&style=for-the-badge&logoColor=d29922)
-![Ubuntu](https://img.shields.io/badge/-Ubuntu-0d1117.svg?logo=ubuntu&style=for-the-badge&logoColor=d29922)
-![VS Code](https://img.shields.io/badge/-VS%20Code-0d1117.svg?logo=visualstudiocode&style=for-the-badge&logoColor=58a6ff)
-![Visual Studio](https://img.shields.io/badge/-Visual%20Studio-0d1117.svg?logo=visualstudio&style=for-the-badge&logoColor=a371f7)
+<p><b>System Engineer · Discord Bot Developer · AI & Financial Data</b></p>
 
----
+[![Email](https://img.shields.io/badge/Email-iam74k4@gmail.com-0d1117?style=for-the-badge&logo=gmail&logoColor=58a6ff)](mailto:iam74k4@gmail.com)
+[![Discord](https://img.shields.io/badge/Discord-74k4-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/users/569686218632331264)
+[![Instagram](https://img.shields.io/badge/Instagram-iam74k4-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/iam74k4)
 
-## GitHub Analytics
+<br>
 
-| Stats | Streak |
-|:-----:|:------:|
-| ![GitHub Stats](https://github-readme-stats.vercel.app/api?username=iam74k4&show_icons=true&theme=github_dark&hide_border=true&bg_color=0d1117&title_color=58a6ff&icon_color=3fb950&text_color=c9d1d9&rank_icon=github) | ![GitHub Streak](https://streak-stats.demolab.com/?user=iam74k4&theme=github-dark-blue&hide_border=true&background=0d1117&ring=58a6ff&fire=3fb950&currStreakLabel=58a6ff&sideLabels=c9d1d9) |
+<sub>profile art inspired by <a href="https://github.com/AVIVASHISHTA29">@AVIVASHISHTA29</a></sub>
 
-| Top Languages | Activity |
-|:-------------:|:--------:|
-| ![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=iam74k4&layout=compact&theme=github_dark&hide_border=true&bg_color=0d1117&title_color=58a6ff&text_color=c9d1d9) | ![Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=iam74k4&bg_color=0d1117&color=58a6ff&line=3fb950&point=c9d1d9&area=true&hide_border=true&area_color=161b22) |
-
----
-
-## Connect with Me
-
-[![Email](https://img.shields.io/badge/Email-0d1117?style=for-the-badge&logo=gmail&logoColor=58a6ff)](mailto:iam74k4@gmail.com)
-[![Discord](https://img.shields.io/badge/Discord-0d1117?style=for-the-badge&logo=discord&logoColor=58a6ff)](https://discord.com/users/569686218632331264)
-[![Instagram](https://img.shields.io/badge/Instagram-0d1117?style=for-the-badge&logo=instagram&logoColor=a371f7)](https://www.instagram.com/iam74k4)
-
-![Footer](https://capsule-render.vercel.app/api?type=waving&color=0:30363d,50:161b22,100:0d1117&height=100&section=footer)
+</div>
