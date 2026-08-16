@@ -40,8 +40,11 @@ jobs:
       - name: Render animated commit-activity SVG
         run: python scripts/generate_streak_svg.py data/commit-activity.json contrib-heatmap.svg
 
+      - name: Render language & punchcard stats SVG
+        run: python scripts/make_stats_svg.py
+
       - name: Commit updated art
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: refresh commit-activity graph [skip ci]"
-          file_pattern: "data/commit-activity.json contrib-heatmap.svg"
+          file_pattern: "data/commit-activity.json contrib-heatmap.svg stats.svg"

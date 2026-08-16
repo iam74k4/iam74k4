@@ -140,12 +140,32 @@ for ry, line in enumerate(rows_txt):
 status_line_y = TITLEBAR_H + ART_H + PAD * 0.35
 status_y = status_line_y + 19
 parts.append(f'<line x1="0" y1="{status_line_y:.1f}" x2="{CANVAS_W}" y2="{status_line_y:.1f}" stroke="{FRAME}"/>')
+CHAR_W, CHAR_T = 7.8, 0.05
+prompt_len = len("taka@github:~$ ")
+whoami_x = PAD + prompt_len * CHAR_W
+whoami_w = len("whoami") * CHAR_W
+type_dur = len("whoami") * CHAR_T
+answer_t = 0.4 + type_dur + 0.25          # "Taka" prints after the command runs
 parts.append(f'<text x="{PAD}" y="{status_y:.1f}" font-size="13">'
-             f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{TITLE_TEXT}">:~$ </tspan>'
-             f'<tspan fill="{INK}">whoami </tspan><tspan fill="{GREEN}">Taka</tspan></text>')
-parts.append(f'<rect x="{PAD+206}" y="{status_y-12:.1f}" width="8" height="14" fill="{INK}">'
+             f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{TITLE_TEXT}">:~$ </tspan></text>')
+if STATIC:
+    parts.append(f'<text x="{whoami_x:.1f}" y="{status_y:.1f}" font-size="13" fill="{INK}" '
+                 f'xml:space="preserve">whoami <tspan fill="{GREEN}">Taka</tspan></text>')
+else:
+    # the command types out, then its answer appears
+    parts.append(f'<clipPath id="who"><rect x="{whoami_x:.1f}" y="{status_y-14:.1f}" height="18" width="0">'
+                 f'<animate attributeName="width" from="0" to="{whoami_w:.1f}" begin="0.4s" '
+                 f'dur="{type_dur:.2f}s" fill="freeze"/></rect></clipPath>')
+    parts.append(f'<g clip-path="url(#who)"><text x="{whoami_x:.1f}" y="{status_y:.1f}" font-size="13" '
+                 f'fill="{INK}" xml:space="preserve" textLength="{whoami_w:.1f}" '
+                 f'lengthAdjust="spacing">whoami</text></g>')
+    parts.append(f'<text x="{whoami_x + (len("whoami ")*CHAR_W):.1f}" y="{status_y:.1f}" font-size="13" '
+                 f'fill="{GREEN}" opacity="0">Taka'
+                 f'<set attributeName="opacity" to="1" begin="{answer_t:.2f}s"/></text>')
+parts.append(f'<rect x="{PAD+206}" y="{status_y-12:.1f}" width="8" height="14" fill="{GREEN}" '
+             f'opacity="{1 if STATIC else 0}">'
              f'<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.5;0.51;1" '
-             f'dur="1s" repeatCount="indefinite"/></rect>')
+             f'dur="1s" begin="{0 if STATIC else answer_t:.2f}s" repeatCount="indefinite"/></rect>')
 
 parts.append("</svg>")
 svg = "".join(parts)

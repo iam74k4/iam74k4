@@ -15,10 +15,15 @@ Levels are quartiles over the nonzero days, like GitHub's own calendar.
 Run daily by .github/workflows/update-profile-art.yml; the render step
 (generate_streak_svg.py) consumes the JSON offline.
 
+Also aggregates, for the stats panel (make_stats_svg.py):
+  languages  byte share per language across the same repos
+  hours      commits-per-hour histogram in local time (GH_TZ_OFFSET)
+
 Env:
   GH_PROFILE_USER  username to aggregate (default iam74k4)
   GH_REPOS         comma-separated owner/repo list; skips repo discovery
                    (useful where /users/{user}/repos is unreachable)
+  GH_TZ_OFFSET     hours to shift commit times for the punchcard (default 9, JST)
   GITHUB_TOKEN     optional token for API rate limits
 """
 import datetime
@@ -29,6 +34,7 @@ import urllib.request
 
 USER = os.environ.get("GH_PROFILE_USER", "iam74k4")
 TOKEN = os.environ.get("GITHUB_TOKEN", "")
+TZ_OFFSET = int(os.environ.get("GH_TZ_OFFSET", 9))
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "commit-activity.json")
 
 TODAY = datetime.datetime.now(datetime.timezone.utc).date()
@@ -72,7 +78,7 @@ def is_mine(commit):
     return u in login or u in email or (u in msg and "co-authored-by" in msg)
 
 
-def count_commits(repo, counts):
+def count_commits(repo, counts, hours):
     page = 1
     while True:
         commits = api(f"https://api.github.com/repos/{repo}/commits"
@@ -81,11 +87,28 @@ def count_commits(repo, counts):
             break
         for c in commits:
             if is_mine(c):
-                d = c["commit"]["author"]["date"][:10]
-                counts[d] = counts.get(d, 0) + 1
+                date = c["commit"]["author"]["date"]     # UTC ISO from the API
+                counts[date[:10]] = counts.get(date[:10], 0) + 1
+                hours[(int(date[11:13]) + TZ_OFFSET) % 24] += 1
         if len(commits) < 100:
             break
         page += 1
+
+
+def count_languages(repos):
+    """Byte share per language across the repos, as [(name, pct), ...]."""
+    totals = {}
+    for repo in repos:
+        try:
+            for lang, n in api(f"https://api.github.com/repos/{repo}/languages").items():
+                totals[lang] = totals.get(lang, 0) + n
+        except Exception as e:
+            print(f"languages for {repo}: {e}", file=sys.stderr)
+    grand = sum(totals.values())
+    if not grand:
+        return []
+    ranked = sorted(totals.items(), key=lambda kv: -kv[1])
+    return [(name, round(n * 100.0 / grand, 1)) for name, n in ranked]
 
 
 def streaks(days):
@@ -125,11 +148,13 @@ if __name__ == "__main__":
         sys.exit(1)
 
     counts = {}
+    hours = [0] * 24
     for repo in repos:
         try:
-            count_commits(repo, counts)
+            count_commits(repo, counts, hours)
         except Exception as e:                    # an empty/blocked repo must not kill the run
             print(f"skipping {repo}: {e}", file=sys.stderr)
+    languages = count_languages(repos)
 
     nonzero = sorted(counts.values())
     days = []
@@ -148,6 +173,9 @@ if __name__ == "__main__":
         json.dump({"total": {"lastYear": total},
                    "stats": {"current_streak": current, "longest_streak": longest,
                              "best_day": best["count"]},
+                   "hours": hours,
+                   "tz_offset": TZ_OFFSET,
+                   "languages": languages,
                    "contributions": days}, f)
     print(f"wrote {OUT_PATH}: {total} commits across "
           f"{sum(1 for x in days if x['count'])} active days, {len(repos)} repos")

@@ -34,13 +34,17 @@ n = len(contribs)
 NW = (n + 6) // 7
 GW = LEFT + NW*(CELL+GAP) + 6            # graph width, inside the frame
 GH = TOP + 7*(CELL+GAP) + 26             # graph height incl. total line
+CMD_LINE_H = 24                          # typed ./commits.sh line above the graph
 W = GW + PAD*2
-H = TITLEBAR_H + GH + PAD
+H = TITLEBAR_H + CMD_LINE_H + GH + PAD
 
 GX = PAD                                  # graph origin inside the canvas
-GY = TITLEBAR_H + PAD*0.55
+GY = TITLEBAR_H + CMD_LINE_H + PAD*0.55
 
-# timing (seconds)
+# timing (seconds): cells start popping once the command finishes typing
+CHAR_W, CHAR_T = 7.8, 0.05
+PROMPT, CMD = "taka@github:~$ ", "./commits.sh --last-year"
+TYPE_END = 0.3 + len(CMD) * CHAR_T + 0.15
 REVEAL, DUR = 3.6, 0.55
 maxorder = (NW-1) + 6*0.55
 
@@ -63,7 +67,7 @@ for name, r in [("Mon",1),("Wed",3),("Fri",5)]:
 for i, c in enumerate(contribs):
     wk, row, lvl = i//7, i%7, c["level"]
     x = GX + LEFT + wk*(CELL+GAP); y = GY + TOP + row*(CELL+GAP)
-    delay = round((wk + row*0.55)/maxorder * REVEAL, 3)
+    delay = round(TYPE_END + (wk + row*0.55)/maxorder * REVEAL, 3)
     cls = "c g" if lvl >= 1 else "c e"
     rects.append(
         f'<rect class="{cls}" x="{x}" y="{y:.0f}" width="{CELL}" height="{CELL}" rx="{RAD}" '
@@ -72,6 +76,25 @@ for i, c in enumerate(contribs):
 
 dots = "".join(f'<circle cx="{PAD + i*16}" cy="{TITLEBAR_H/2}" r="5" fill="{c}"/>'
                for i, c in enumerate(["#ff5f56", "#ffbd2e", "#27c93f"]))
+
+# typed command line under the titlebar (prompt static, command types out)
+cy = TITLEBAR_H + 20
+cmd_x = PAD + len(PROMPT) * CHAR_W
+cmd_w = len(CMD) * CHAR_W
+type_dur = len(CMD) * CHAR_T
+cmd_line = (
+    f'<text x="{PAD}" y="{cy}" font-size="13">'
+    f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{GRAY}">:~$ </tspan></text>'
+    f'<clipPath id="cmd"><rect x="{cmd_x:.1f}" y="{cy-14}" height="18" width="0">'
+    f'<animate attributeName="width" from="0" to="{cmd_w:.1f}" begin="0.3s" '
+    f'dur="{type_dur:.2f}s" fill="freeze"/></rect></clipPath>'
+    f'<g clip-path="url(#cmd)"><text x="{cmd_x:.1f}" y="{cy}" font-size="13" fill="{INK}" '
+    f'xml:space="preserve" textLength="{cmd_w:.1f}" lengthAdjust="spacing">{CMD}</text></g>'
+    f'<rect y="{cy-12}" width="8" height="14" fill="{GREEN}" opacity="0">'
+    f'<animate attributeName="x" from="{cmd_x:.1f}" to="{cmd_x+cmd_w:.1f}" begin="0.3s" '
+    f'dur="{type_dur:.2f}s" fill="freeze"/>'
+    f'<set attributeName="opacity" to="0.9" begin="0s"/>'
+    f'<set attributeName="opacity" to="0" begin="{0.3+type_dur:.2f}s"/></rect>')
 
 # streak stats (right-aligned in the bottom line), when the data has them
 stats = data.get("stats")
@@ -102,7 +125,8 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewB
 <rect x="0.5" y="0.5" width="{W-1}" height="{H-1}" rx="12" fill="none" stroke="{FRAME}"/>
 <line x1="0" y1="{TITLEBAR_H}" x2="{W}" y2="{TITLEBAR_H}" stroke="{FRAME}"/>
 {dots}
-<text x="{W/2:.0f}" y="{TITLEBAR_H/2 + 4}" fill="{GRAY}" font-size="12" text-anchor="middle">taka@github: ~$ ./commits.sh --last-year</text>
+<text x="{W/2:.0f}" y="{TITLEBAR_H/2 + 4}" fill="{GRAY}" font-size="12" text-anchor="middle">taka@github: ~</text>
+{cmd_line}
 {''.join(labels)}
 {''.join(rects)}
 <text x="{GX+LEFT}" y="{H-16:.0f}" font-size="13"><tspan fill="{GREEN}" font-weight="700">{total:,}</tspan><tspan fill="{INK}"> commits in the last year</tspan></text>

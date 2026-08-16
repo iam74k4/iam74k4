@@ -7,6 +7,7 @@
      wordmark:  python scripts/make_wordmark_svg.py --mode rock
      heatmap:   python scripts/fetch_commit_activity.py
                 && python scripts/generate_streak_svg.py   (daily via Actions)
+     stats:     python scripts/make_stats_svg.py           (daily via Actions)
      stack:     python scripts/make_stack_svg.py
      links:     python scripts/make_links_svg.py -->
 
@@ -18,6 +19,8 @@
 </table>
 
 <img src="./contrib-heatmap.svg" width="860" alt="Taka's commit activity over the last year — auto-refreshed daily" />
+
+<img src="./stats.svg" width="860" alt="Language share and commits by hour — auto-refreshed daily" />
 
 <img src="./stack.svg" width="860" alt="Tech stack" />
 

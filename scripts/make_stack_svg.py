@@ -25,18 +25,26 @@ TITLEBAR_H = 28
 LINE_H = 22
 VALUE_X = 165          # second column: keys align left, values align here
 
+# measured language share lives in the stats panel; this one is the
+# self-declared toolset
 ROWS = [
-    ("languages",  ["python", "c#", "java", "php", "javascript", "html/css"]),
     ("frameworks", [".net", "django"]),
     ("infra",      ["docker", "gcp", "nginx", "mysql"]),
     ("env",        ["windows", "linux", "ubuntu", "vscode", "visual-studio"]),
 ]
 
 STAGGER = 0.18
+CHAR_W = 7.8
+CHAR_T = 0.05         # typing speed, seconds per character
 SEP = f'<tspan fill="{GRAY}"> · </tspan>'
 
+PROMPT = "taka@github:~$ "
+CMD = "./stack.sh"
+type_dur = len(CMD) * CHAR_T
+reveal = 0.3 + type_dur + 0.15
+
 content_top = TITLEBAR_H + PAD * 0.55 + 14
-n_lines = len(ROWS) + 1                      # rows + trailing prompt
+n_lines = 1 + len(ROWS) + 1                  # typed cmd + rows + trailing prompt
 H = int(content_top + n_lines * LINE_H + 4)
 
 parts = [
@@ -52,11 +60,29 @@ parts = [
 for i, c in enumerate(["#ff5f56", "#ffbd2e", "#27c93f"]):
     parts.append(f'<circle cx="{PAD + i*16}" cy="{TITLEBAR_H/2}" r="5" fill="{c}"/>')
 parts.append(f'<text x="{W/2:.0f}" y="{TITLEBAR_H/2 + 4}" fill="{GRAY}" font-size="12" '
-             f'text-anchor="middle">taka@github: ~$ ./stack.sh</text>')
+             f'text-anchor="middle">taka@github: ~</text>')
 
-for i, (key, values) in enumerate(ROWS):
+# typed command line: the prompt is already there, the command types out
+import html as _html
+cmd_x = PAD + len(PROMPT) * CHAR_W
+cmd_w = len(CMD) * CHAR_W
+parts.append(f'<text x="{PAD}" y="{content_top:.1f}" font-size="13">'
+             f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{GRAY}">:~$ </tspan></text>')
+parts.append(f'<clipPath id="cmd"><rect x="{cmd_x:.1f}" y="{content_top-14:.1f}" height="18" width="0">'
+             f'<animate attributeName="width" from="0" to="{cmd_w:.1f}" begin="0.3s" '
+             f'dur="{type_dur:.2f}s" fill="freeze"/></rect></clipPath>')
+parts.append(f'<g clip-path="url(#cmd)"><text x="{cmd_x:.1f}" y="{content_top:.1f}" '
+             f'font-size="13" fill="{INK}" xml:space="preserve" textLength="{cmd_w:.1f}" '
+             f'lengthAdjust="spacing">{_html.escape(CMD)}</text></g>')
+parts.append(f'<rect y="{content_top-12:.1f}" width="8" height="14" fill="{GREEN}" opacity="0">'
+             f'<animate attributeName="x" from="{cmd_x:.1f}" to="{cmd_x+cmd_w:.1f}" begin="0.3s" '
+             f'dur="{type_dur:.2f}s" fill="freeze"/>'
+             f'<set attributeName="opacity" to="0.9" begin="0s"/>'
+             f'<set attributeName="opacity" to="0" begin="{0.3+type_dur:.2f}s"/></rect>')
+
+for i, (key, values) in enumerate(ROWS, start=1):
     y = content_top + i * LINE_H
-    t = i * STAGGER
+    t = reveal + (i - 1) * STAGGER
     joined = SEP.join(f'<tspan fill="{INK}">{v}</tspan>' for v in values)
     parts.append(f'<text x="{PAD}" y="{y:.1f}" font-size="13" opacity="0">'
                  f'<tspan fill="{GREEN}">&gt; </tspan><tspan fill="{GRAY}">{key}</tspan>'
@@ -65,8 +91,8 @@ for i, (key, values) in enumerate(ROWS):
                  f'<set attributeName="opacity" to="1" begin="{t:.2f}s"/></text>')
 
 # trailing prompt with the shared blinking cursor
-py = content_top + len(ROWS) * LINE_H
-pt = len(ROWS) * STAGGER
+py = content_top + (len(ROWS) + 1) * LINE_H
+pt = reveal + len(ROWS) * STAGGER
 parts.append(f'<text x="{PAD}" y="{py:.1f}" font-size="13" opacity="0">'
              f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{GRAY}">:~$</tspan>'
              f'<set attributeName="opacity" to="1" begin="{pt:.2f}s"/></text>')

@@ -298,27 +298,51 @@ def emit(frames, mode, out, dur, reveal):
         return f'<g fill="{INK}"{extra}>' + "".join(out_rows) + "</g>"
 
     def footer(begin):
-        """Terminal printout under the art: `cat about.yml` + the yaml, revealed
-        line by line once the wipe finishes. begin<0 renders it frozen."""
+        """Terminal printout under the art: `cat about.yml` types itself out,
+        then the yaml prints line by line. begin<0 renders it frozen."""
         sep_y = TITLEBAR_H + art_h + PAD * 0.55
         rows = [f'<line x1="0" y1="{sep_y:.1f}" x2="{canvas_w:.0f}" y2="{sep_y:.1f}" stroke="{FRAME}"/>']
         prompt = (f'<tspan fill="{GREEN}">taka@github</tspan>'
                   f'<tspan fill="{TITLE_TEXT}">:~$ </tspan>')
-        texts = [prompt + f'<tspan fill="{INK}">cat about.yml</tspan>']
-        texts += [(f'<tspan fill="{TITLE_TEXT}">{k}: </tspan><tspan fill="{INK}">{html.escape(v)}</tspan>')
-                  for k, v in FOOTER_LINES]
+        char_w, char_t = 7.8, 0.05
+        cmd = "cat about.yml"
+        cmd_x = PAD + len("taka@github:~$ ") * char_w
+        cmd_w = len(cmd) * char_w
+        type_dur = len(cmd) * char_t
+        cy0 = sep_y + 16
+        if begin < 0:
+            rows.append(f'<text x="{PAD}" y="{cy0:.1f}" font-size="13">{prompt}'
+                        f'<tspan fill="{INK}">{cmd}</tspan></text>')
+            out_begin = -1.0
+        else:
+            rows.append(f'<text x="{PAD}" y="{cy0:.1f}" font-size="13" opacity="0">{prompt}'
+                        f'<set attributeName="opacity" to="1" begin="{begin:.2f}s"/></text>')
+            rows.append(f'<clipPath id="fcmd"><rect x="{cmd_x:.1f}" y="{cy0-14:.1f}" height="18" width="0">'
+                        f'<animate attributeName="width" from="0" to="{cmd_w:.1f}" begin="{begin+0.2:.2f}s" '
+                        f'dur="{type_dur:.2f}s" fill="freeze"/></rect></clipPath>')
+            rows.append(f'<g clip-path="url(#fcmd)"><text x="{cmd_x:.1f}" y="{cy0:.1f}" font-size="13" '
+                        f'fill="{INK}" xml:space="preserve" textLength="{cmd_w:.1f}" '
+                        f'lengthAdjust="spacing">{cmd}</text></g>')
+            rows.append(f'<rect y="{cy0-12:.1f}" width="8" height="14" fill="{GREEN}" opacity="0">'
+                        f'<animate attributeName="x" from="{cmd_x:.1f}" to="{cmd_x+cmd_w:.1f}" '
+                        f'begin="{begin+0.2:.2f}s" dur="{type_dur:.2f}s" fill="freeze"/>'
+                        f'<set attributeName="opacity" to="0.9" begin="{begin:.2f}s"/>'
+                        f'<set attributeName="opacity" to="0" begin="{begin+0.2+type_dur:.2f}s"/></rect>')
+            out_begin = begin + 0.2 + type_dur + 0.15
+        texts = [(f'<tspan fill="{TITLE_TEXT}">{k}: </tspan><tspan fill="{INK}">{html.escape(v)}</tspan>')
+                 for k, v in FOOTER_LINES]
         texts.append(prompt)
-        for i, body in enumerate(texts):
+        for i, body in enumerate(texts, start=1):
             y = sep_y + 16 + i * FOOTER_LINE_H
-            x = PAD + (18 if 0 < i <= len(FOOTER_LINES) else 0)
+            x = PAD + (18 if i <= len(FOOTER_LINES) else 0)
             if begin < 0:
                 rows.append(f'<text x="{x}" y="{y:.1f}" font-size="13">{body}</text>')
             else:
-                t = begin + i * 0.18
+                t = out_begin + (i - 1) * 0.18
                 rows.append(f'<text x="{x}" y="{y:.1f}" font-size="13" opacity="0">{body}'
                             f'<set attributeName="opacity" to="1" begin="{t:.2f}s"/></text>')
-        cy = sep_y + 16 + (len(texts) - 1) * FOOTER_LINE_H
-        blink_begin = "0s" if begin < 0 else f"{begin + (len(texts) - 1) * 0.18:.2f}s"
+        cy = sep_y + 16 + len(texts) * FOOTER_LINE_H
+        blink_begin = "0s" if begin < 0 else f"{out_begin + (len(texts) - 1) * 0.18:.2f}s"
         rows.append(f'<rect x="{PAD + 122}" y="{cy - 11:.1f}" width="8" height="14" fill="{GREEN}" '
                     f'opacity="0"><animate attributeName="opacity" values="1;1;0;0" '
                     f'keyTimes="0;0.5;0.51;1" dur="1s" begin="{blink_begin}" '
