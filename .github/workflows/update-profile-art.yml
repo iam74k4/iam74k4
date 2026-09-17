@@ -37,6 +37,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Render the dashboard SVG
+        run: python scripts/make_dashboard_svg.py
+
+      # the stacked-panel versions are not on the README any more, but they are
+      # still built so their committed copies never fall behind the data
       - name: Render animated commit-activity SVG
         run: python scripts/generate_streak_svg.py data/commit-activity.json contrib-heatmap.svg
 
@@ -47,4 +52,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: refresh commit-activity graph [skip ci]"
-          file_pattern: "data/commit-activity.json contrib-heatmap.svg stats.svg"
+          file_pattern: "data/commit-activity.json profile.svg contrib-heatmap.svg stats.svg"

@@ -1,30 +1,22 @@
 <div align="center">
 
-<!-- one continuous terminal session: every panel shares the same window
-     chrome, palette (#080d12 bg / #cbd5e1 ink / #22d3ee cyan accent) and
-     monospace type.
-     portrait:  python scripts/make_ascii_svg.py
+<!-- the board is one SVG, so GitHub has no layout of its own to get wrong:
+     the cards keep their positions and sizes at every width.
+     palette: #080d12 bg / #cbd5e1 ink / #22d3ee accent, monospace throughout.
+     board:     python scripts/fetch_commit_activity.py
+                && python scripts/make_dashboard_svg.py   (daily via Actions)
+     portrait:  python scripts/make_ascii_svg.py          (feeds the board)
      wordmark:  python scripts/make_wordmark_svg.py --mode rock
-     heatmap:   python scripts/fetch_commit_activity.py
-                && python scripts/generate_streak_svg.py   (daily via Actions)
-     stats:     python scripts/make_stats_svg.py           (daily via Actions)
-     stack:     python scripts/make_stack_svg.py
-     links:     python scripts/make_links_svg.py -->
+     links:     python scripts/make_links_svg.py   -- separate files on purpose:
+                an SVG behind <img> cannot carry clickable areas, so only these
+                chips can be wrapped in a link.
+     portrait and wordmark need Pillow + numpy:
+                pip install -r scripts/requirements.txt
+     the earlier stacked panels (heatmap / stats / stack) still build from
+     their own scripts in scripts/. -->
 
-<table>
-<tr>
-<td valign="top"><img src="./taka-ascii.svg" width="370" alt="Taka — ASCII portrait" /></td>
-<td valign="top"><img src="./wordmark.svg" width="490" alt="74K4 — 3D ASCII wordmark" /></td>
-</tr>
-</table>
+<img src="./profile.svg" width="860" alt="Taka — System Engineer in Japan. Commit activity for the last 12 months, language share, tech stack and commits by hour — auto-refreshed daily from the GitHub API." />
 
-<img src="./contrib-heatmap.svg" width="860" alt="Taka's commit activity over the last year — auto-refreshed daily" />
-
-<img src="./stats.svg" width="860" alt="Language share and commits by hour — auto-refreshed daily" />
-
-<img src="./stack.svg" width="860" alt="Tech stack" />
-
-<br>
 <br>
 
 [![Email](./links-mail.svg)](mailto:iam74k4@gmail.com)
