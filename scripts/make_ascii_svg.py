@@ -31,7 +31,9 @@ COLS = 100
 ROWS = 53
 CELL_W = 8
 CELL_H = 15
-RAMP = " .`:-=+*cs#%@"  # bright(sparse) -> dark(dense); leading space clears bg
+RAMP = " .:10"         # bright(sparse) -> dark(dense); leading space clears bg.
+# 0 has more ink than 1, so the dark end is 0; ":" carries the midtone that keeps
+# the jaw and cheek readable once the board scales the portrait down.
 
 # the avatar is a flat illustration: pure-white bg (255), light skin (~230),
 # near-black hair/shirt (~35). WHITE_FLOOR sits between skin and bg so the
