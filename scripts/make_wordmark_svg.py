@@ -91,12 +91,12 @@ FOG = 0.34             # how much the far end of the word dims, 0..1
 FOG_SPAN = 0.55        # world-units of depth the fog ramp covers
 
 # ---- palette (matches the rest of the profile) ----------------------------
-BG = "#0d1117"
-BG2 = "#111722"
-FRAME = "#30363d"
-TITLE_TEXT = "#7d8590"
-INK = "#c9d1d9"
-GREEN = "#39d353"    # accent: the same green as the contribution heatmap
+BG = "#080d12"
+BG2 = "#0d141c"
+FRAME = "#22303d"
+TITLE_TEXT = "#7e91a6"
+INK = "#cbd5e1"
+ACCENT = "#22d3ee"    # accent: the same cyan as the contribution heatmap
 
 PAD = 18
 TITLEBAR_H = 28
@@ -302,7 +302,7 @@ def emit(frames, mode, out, dur, reveal):
         then the yaml prints line by line. begin<0 renders it frozen."""
         sep_y = TITLEBAR_H + art_h + PAD * 0.55
         rows = [f'<line x1="0" y1="{sep_y:.1f}" x2="{canvas_w:.0f}" y2="{sep_y:.1f}" stroke="{FRAME}"/>']
-        prompt = (f'<tspan fill="{GREEN}">taka@github</tspan>'
+        prompt = (f'<tspan fill="{ACCENT}">taka@github</tspan>'
                   f'<tspan fill="{TITLE_TEXT}">:~$ </tspan>')
         char_w, char_t = 7.8, 0.05
         cmd = "cat about.yml"
@@ -323,7 +323,7 @@ def emit(frames, mode, out, dur, reveal):
             rows.append(f'<g clip-path="url(#fcmd)"><text x="{cmd_x:.1f}" y="{cy0:.1f}" font-size="13" '
                         f'fill="{INK}" xml:space="preserve" textLength="{cmd_w:.1f}" '
                         f'lengthAdjust="spacing">{cmd}</text></g>')
-            rows.append(f'<rect y="{cy0-12:.1f}" width="8" height="14" fill="{GREEN}" opacity="0">'
+            rows.append(f'<rect y="{cy0-12:.1f}" width="8" height="14" fill="{ACCENT}" opacity="0">'
                         f'<animate attributeName="x" from="{cmd_x:.1f}" to="{cmd_x+cmd_w:.1f}" '
                         f'begin="{begin+0.2:.2f}s" dur="{type_dur:.2f}s" fill="freeze"/>'
                         f'<set attributeName="opacity" to="0.9" begin="{begin:.2f}s"/>'
@@ -343,7 +343,7 @@ def emit(frames, mode, out, dur, reveal):
                             f'<set attributeName="opacity" to="1" begin="{t:.2f}s"/></text>')
         cy = sep_y + 16 + len(texts) * FOOTER_LINE_H
         blink_begin = "0s" if begin < 0 else f"{out_begin + (len(texts) - 1) * 0.18:.2f}s"
-        rows.append(f'<rect x="{PAD + 122}" y="{cy - 11:.1f}" width="8" height="14" fill="{GREEN}" '
+        rows.append(f'<rect x="{PAD + 122}" y="{cy - 11:.1f}" width="8" height="14" fill="{ACCENT}" '
                     f'opacity="0"><animate attributeName="opacity" values="1;1;0;0" '
                     f'keyTimes="0;0.5;0.51;1" dur="1s" begin="{blink_begin}" '
                     f'repeatCount="indefinite"/></rect>')

@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- one continuous terminal session: every panel shares the same window
-     chrome, palette (#0d1117 bg / #c9d1d9 ink / #39d353 green accent) and
+     chrome, palette (#080d12 bg / #cbd5e1 ink / #22d3ee cyan accent) and
      monospace type.
      portrait:  python scripts/make_ascii_svg.py
      wordmark:  python scripts/make_wordmark_svg.py --mode rock

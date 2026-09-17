@@ -11,12 +11,12 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "stack.svg")
 
-BG = "#0d1117"
-BG2 = "#111722"
-FRAME = "#30363d"
-GRAY = "#7d8590"
-INK = "#c9d1d9"
-GREEN = "#39d353"
+BG = "#080d12"
+BG2 = "#0d141c"
+FRAME = "#22303d"
+GRAY = "#7e91a6"
+INK = "#cbd5e1"
+ACCENT = "#22d3ee"
 
 # canvas width matches the heatmap panel so the two stack flush in the README
 W = 924
@@ -67,14 +67,14 @@ import html as _html
 cmd_x = PAD + len(PROMPT) * CHAR_W
 cmd_w = len(CMD) * CHAR_W
 parts.append(f'<text x="{PAD}" y="{content_top:.1f}" font-size="13">'
-             f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{GRAY}">:~$ </tspan></text>')
+             f'<tspan fill="{ACCENT}">taka@github</tspan><tspan fill="{GRAY}">:~$ </tspan></text>')
 parts.append(f'<clipPath id="cmd"><rect x="{cmd_x:.1f}" y="{content_top-14:.1f}" height="18" width="0">'
              f'<animate attributeName="width" from="0" to="{cmd_w:.1f}" begin="0.3s" '
              f'dur="{type_dur:.2f}s" fill="freeze"/></rect></clipPath>')
 parts.append(f'<g clip-path="url(#cmd)"><text x="{cmd_x:.1f}" y="{content_top:.1f}" '
              f'font-size="13" fill="{INK}" xml:space="preserve" textLength="{cmd_w:.1f}" '
              f'lengthAdjust="spacing">{_html.escape(CMD)}</text></g>')
-parts.append(f'<rect y="{content_top-12:.1f}" width="8" height="14" fill="{GREEN}" opacity="0">'
+parts.append(f'<rect y="{content_top-12:.1f}" width="8" height="14" fill="{ACCENT}" opacity="0">'
              f'<animate attributeName="x" from="{cmd_x:.1f}" to="{cmd_x+cmd_w:.1f}" begin="0.3s" '
              f'dur="{type_dur:.2f}s" fill="freeze"/>'
              f'<set attributeName="opacity" to="0.9" begin="0s"/>'
@@ -85,7 +85,7 @@ for i, (key, values) in enumerate(ROWS, start=1):
     t = reveal + (i - 1) * STAGGER
     joined = SEP.join(f'<tspan fill="{INK}">{v}</tspan>' for v in values)
     parts.append(f'<text x="{PAD}" y="{y:.1f}" font-size="13" opacity="0">'
-                 f'<tspan fill="{GREEN}">&gt; </tspan><tspan fill="{GRAY}">{key}</tspan>'
+                 f'<tspan fill="{ACCENT}">&gt; </tspan><tspan fill="{GRAY}">{key}</tspan>'
                  f'<set attributeName="opacity" to="1" begin="{t:.2f}s"/></text>')
     parts.append(f'<text x="{VALUE_X}" y="{y:.1f}" font-size="13" opacity="0">{joined}'
                  f'<set attributeName="opacity" to="1" begin="{t:.2f}s"/></text>')
@@ -94,9 +94,9 @@ for i, (key, values) in enumerate(ROWS, start=1):
 py = content_top + (len(ROWS) + 1) * LINE_H
 pt = reveal + len(ROWS) * STAGGER
 parts.append(f'<text x="{PAD}" y="{py:.1f}" font-size="13" opacity="0">'
-             f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{GRAY}">:~$</tspan>'
+             f'<tspan fill="{ACCENT}">taka@github</tspan><tspan fill="{GRAY}">:~$</tspan>'
              f'<set attributeName="opacity" to="1" begin="{pt:.2f}s"/></text>')
-parts.append(f'<rect x="{PAD + 122}" y="{py - 11:.1f}" width="8" height="14" fill="{GREEN}" '
+parts.append(f'<rect x="{PAD + 122}" y="{py - 11:.1f}" width="8" height="14" fill="{ACCENT}" '
              f'opacity="0"><animate attributeName="opacity" values="1;1;0;0" '
              f'keyTimes="0;0.5;0.51;1" dur="1s" begin="{pt:.2f}s" '
              f'repeatCount="indefinite"/></rect>')

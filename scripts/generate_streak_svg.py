@@ -19,13 +19,13 @@ total = data["total"]["lastYear"]
 # the graph sits inside the same terminal-window chrome as the portrait and
 # wordmark panels, so all three read as one continuous session.
 CELL, GAP, RAD, LEFT, TOP = 13, 3, 2.5, 34, 24
-COLORS = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"]
-BG = "#0d1117"
-BG2 = "#111722"
-FRAME = "#30363d"
-GRAY = "#7d8590"
-INK = "#c9d1d9"
-GREEN = "#39d353"
+COLORS = ["#111c26", "#0b4f5e", "#0e7490", "#15a5c4", "#22d3ee"]
+BG = "#080d12"
+BG2 = "#0d141c"
+FRAME = "#22303d"
+GRAY = "#7e91a6"
+INK = "#cbd5e1"
+ACCENT = "#22d3ee"
 PAD = 18
 TITLEBAR_H = 28
 MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
@@ -84,13 +84,13 @@ cmd_w = len(CMD) * CHAR_W
 type_dur = len(CMD) * CHAR_T
 cmd_line = (
     f'<text x="{PAD}" y="{cy}" font-size="13">'
-    f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{GRAY}">:~$ </tspan></text>'
+    f'<tspan fill="{ACCENT}">taka@github</tspan><tspan fill="{GRAY}">:~$ </tspan></text>'
     f'<clipPath id="cmd"><rect x="{cmd_x:.1f}" y="{cy-14}" height="18" width="0">'
     f'<animate attributeName="width" from="0" to="{cmd_w:.1f}" begin="0.3s" '
     f'dur="{type_dur:.2f}s" fill="freeze"/></rect></clipPath>'
     f'<g clip-path="url(#cmd)"><text x="{cmd_x:.1f}" y="{cy}" font-size="13" fill="{INK}" '
     f'xml:space="preserve" textLength="{cmd_w:.1f}" lengthAdjust="spacing">{CMD}</text></g>'
-    f'<rect y="{cy-12}" width="8" height="14" fill="{GREEN}" opacity="0">'
+    f'<rect y="{cy-12}" width="8" height="14" fill="{ACCENT}" opacity="0">'
     f'<animate attributeName="x" from="{cmd_x:.1f}" to="{cmd_x+cmd_w:.1f}" begin="0.3s" '
     f'dur="{type_dur:.2f}s" fill="freeze"/>'
     f'<set attributeName="opacity" to="0.9" begin="0s"/>'
@@ -101,11 +101,11 @@ stats = data.get("stats")
 if stats:
     stats_text = (
         f'<text x="{GX+GW-6}" y="{H-16:.0f}" font-size="13" text-anchor="end">'
-        f'<tspan fill="{INK}">streak </tspan><tspan fill="{GREEN}" font-weight="700">{stats["current_streak"]}d</tspan>'
+        f'<tspan fill="{INK}">streak </tspan><tspan fill="{ACCENT}" font-weight="700">{stats["current_streak"]}d</tspan>'
         f'<tspan fill="{GRAY}"> · </tspan>'
-        f'<tspan fill="{INK}">longest </tspan><tspan fill="{GREEN}" font-weight="700">{stats["longest_streak"]}d</tspan>'
+        f'<tspan fill="{INK}">longest </tspan><tspan fill="{ACCENT}" font-weight="700">{stats["longest_streak"]}d</tspan>'
         f'<tspan fill="{GRAY}"> · </tspan>'
-        f'<tspan fill="{INK}">max </tspan><tspan fill="{GREEN}" font-weight="700">{stats["best_day"]}</tspan>'
+        f'<tspan fill="{INK}">max </tspan><tspan fill="{ACCENT}" font-weight="700">{stats["best_day"]}</tspan>'
         f'<tspan fill="{INK}">/day</tspan></text>')
 else:
     stats_text = ""
@@ -129,7 +129,7 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewB
 {cmd_line}
 {''.join(labels)}
 {''.join(rects)}
-<text x="{GX+LEFT}" y="{H-16:.0f}" font-size="13"><tspan fill="{GREEN}" font-weight="700">{total:,}</tspan><tspan fill="{INK}"> commits in the last year</tspan></text>
+<text x="{GX+LEFT}" y="{H-16:.0f}" font-size="13"><tspan fill="{ACCENT}" font-weight="700">{total:,}</tspan><tspan fill="{INK}"> commits in the last year</tspan></text>
 {stats_text}
 </svg>'''
 

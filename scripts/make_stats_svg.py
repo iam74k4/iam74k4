@@ -17,12 +17,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "data", "commit-activity.json")
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "..", "stats.svg")
 
-BG = "#0d1117"
-BG2 = "#111722"
-FRAME = "#30363d"
-GRAY = "#7d8590"
-INK = "#c9d1d9"
-GREEN = "#39d353"
+BG = "#080d12"
+BG2 = "#0d141c"
+FRAME = "#22303d"
+GRAY = "#7e91a6"
+INK = "#cbd5e1"
+ACCENT = "#22d3ee"
 
 W = 924               # matches the heatmap/stack panels
 PAD = 18
@@ -71,14 +71,14 @@ parts.append(f'<text x="{W/2:.0f}" y="{TITLEBAR_H/2 + 4}" fill="{GRAY}" font-siz
 cmd_x = PAD + len(PROMPT) * CHAR_W
 cmd_w = len(CMD) * CHAR_W
 parts.append(f'<text x="{PAD}" y="{content_top:.1f}" font-size="13">'
-             f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{GRAY}">:~$ </tspan></text>')
+             f'<tspan fill="{ACCENT}">taka@github</tspan><tspan fill="{GRAY}">:~$ </tspan></text>')
 parts.append(f'<clipPath id="cmd"><rect x="{cmd_x:.1f}" y="{content_top-14:.1f}" height="18" width="0">'
              f'<animate attributeName="width" from="0" to="{cmd_w:.1f}" begin="0.3s" '
              f'dur="{type_dur:.2f}s" fill="freeze"/></rect></clipPath>')
 parts.append(f'<g clip-path="url(#cmd)"><text x="{cmd_x:.1f}" y="{content_top:.1f}" '
              f'font-size="13" fill="{INK}" xml:space="preserve" textLength="{cmd_w:.1f}" '
              f'lengthAdjust="spacing">{html.escape(CMD)}</text></g>')
-parts.append(f'<rect y="{content_top-12:.1f}" width="8" height="14" fill="{GREEN}" opacity="0">'
+parts.append(f'<rect y="{content_top-12:.1f}" width="8" height="14" fill="{ACCENT}" opacity="0">'
              f'<animate attributeName="x" from="{cmd_x:.1f}" to="{cmd_x+cmd_w:.1f}" begin="0.3s" '
              f'dur="{type_dur:.2f}s" fill="freeze"/>'
              f'<set attributeName="opacity" to="0.9" begin="0s"/>'
@@ -98,7 +98,7 @@ top_pct = langs[0][1] if langs else 100.0
 name_w = max((len(n) for n, _ in langs), default=8) + 2
 for i, (name, pct) in enumerate(langs):
     filled = max(1, round(pct / top_pct * BAR_CELLS))
-    bar = (f'<tspan fill="{GREEN}">{"█" * filled}</tspan>'
+    bar = (f'<tspan fill="{ACCENT}">{"█" * filled}</tspan>'
            f'<tspan fill="{FRAME}">{"░" * (BAR_CELLS - filled)}</tspan>')
     body = (f'<tspan fill="{INK}">{html.escape(name.lower().ljust(name_w))}</tspan>{bar}'
             f'<tspan fill="{GRAY}">  {pct:>5.1f}%</tspan>')
@@ -112,14 +112,14 @@ peak_h = hours.index(max(hours)) if any(hours) else 0
 sign = "+" if tz >= 0 else "-"
 parts.append(line(RIGHT_X, rows_top, f'<tspan fill="{GRAY}">commits by hour (utc{sign}{abs(tz)})</tspan>', reveal))
 parts.append(line(RIGHT_X, rows_top + LINE_H,
-                  f'<tspan fill="{GREEN}" textLength="{24*CHAR_W:.1f}" lengthAdjust="spacing">{spark}</tspan>',
+                  f'<tspan fill="{ACCENT}" textLength="{24*CHAR_W:.1f}" lengthAdjust="spacing">{spark}</tspan>',
                   reveal + 0.12))
 axis = "0     6     12    18    23"
 parts.append(line(RIGHT_X, rows_top + 2 * LINE_H,
                   f'<tspan fill="{GRAY}" textLength="{len(axis)*CHAR_W:.1f}" lengthAdjust="spacing">{axis}</tspan>',
                   reveal + 0.12))
 parts.append(line(RIGHT_X, rows_top + 3 * LINE_H,
-                  f'<tspan fill="{INK}">peak </tspan><tspan fill="{GREEN}" font-weight="700">{peak_h:02d}:00</tspan>'
+                  f'<tspan fill="{INK}">peak </tspan><tspan fill="{ACCENT}" font-weight="700">{peak_h:02d}:00</tspan>'
                   f'<tspan fill="{GRAY}"> ({max(hours)} commits)</tspan>',
                   reveal + 0.24))
 

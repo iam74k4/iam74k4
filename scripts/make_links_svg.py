@@ -2,7 +2,7 @@
 """
 Generate the link "chips": small terminal-styled SVG buttons that replace
 stock shields.io badges so the links row shares the profile's palette
-(same background gradient, frame, monospace type and green accent as the
+(same background gradient, frame, monospace type and cyan accent as the
 portrait / wordmark / heatmap panels).
 
 Each chip is its own SVG so the README can wrap it in a normal markdown
@@ -15,12 +15,12 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..")
 
-BG = "#0d1117"
-BG2 = "#111722"
-FRAME = "#30363d"
-GRAY = "#7d8590"
-INK = "#c9d1d9"
-GREEN = "#39d353"
+BG = "#080d12"
+BG2 = "#0d141c"
+FRAME = "#22303d"
+GRAY = "#7e91a6"
+INK = "#cbd5e1"
+ACCENT = "#22d3ee"
 
 CHAR_W = 7.8       # ~monospace advance at 13px
 H = 36
@@ -45,7 +45,7 @@ for fname, label, value in LINKS:
         f'<rect width="{w}" height="{H}" rx="8" fill="url(#g)"/>'
         f'<rect x="0.5" y="0.5" width="{w-1}" height="{H-1}" rx="8" fill="none" stroke="{FRAME}"/>'
         f'<text x="{PAD_X}" y="{y:.1f}" font-size="13">'
-        f'<tspan fill="{GREEN}">&gt; </tspan>'
+        f'<tspan fill="{ACCENT}">&gt; </tspan>'
         f'<tspan fill="{GRAY}">{label}  </tspan>'
         f'<tspan fill="{INK}">{value}</tspan></text>'
         f'</svg>'

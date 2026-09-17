@@ -49,13 +49,13 @@ ART_H = ROWS * CELL_H
 CANVAS_W = ART_W + PAD * 2
 CANVAS_H = TITLEBAR_H + ART_H + STATUS_H + PAD
 
-BG = "#0d1117"
-BG2 = "#111722"
-FRAME = "#30363d"
-TITLE_TEXT = "#7d8590"
-INK = "#c9d1d9"      # the single ascii color
-GREEN = "#39d353"    # accent: the same green as the contribution heatmap
-CURSOR = GREEN
+BG = "#080d12"
+BG2 = "#0d141c"
+FRAME = "#22303d"
+TITLE_TEXT = "#7e91a6"
+INK = "#cbd5e1"      # the single ascii color
+ACCENT = "#22d3ee"    # accent: the same cyan as the contribution heatmap
+CURSOR = ACCENT
 
 # ---- reveal timing (one-shot; a cursor rasters top -> bottom) -------------
 ROW_DUR = 0.11
@@ -147,10 +147,10 @@ whoami_w = len("whoami") * CHAR_W
 type_dur = len("whoami") * CHAR_T
 answer_t = 0.4 + type_dur + 0.25          # "Taka" prints after the command runs
 parts.append(f'<text x="{PAD}" y="{status_y:.1f}" font-size="13">'
-             f'<tspan fill="{GREEN}">taka@github</tspan><tspan fill="{TITLE_TEXT}">:~$ </tspan></text>')
+             f'<tspan fill="{ACCENT}">taka@github</tspan><tspan fill="{TITLE_TEXT}">:~$ </tspan></text>')
 if STATIC:
     parts.append(f'<text x="{whoami_x:.1f}" y="{status_y:.1f}" font-size="13" fill="{INK}" '
-                 f'xml:space="preserve">whoami <tspan fill="{GREEN}">Taka</tspan></text>')
+                 f'xml:space="preserve">whoami <tspan fill="{ACCENT}">Taka</tspan></text>')
 else:
     # the command types out, then its answer appears
     parts.append(f'<clipPath id="who"><rect x="{whoami_x:.1f}" y="{status_y-14:.1f}" height="18" width="0">'
@@ -160,9 +160,9 @@ else:
                  f'fill="{INK}" xml:space="preserve" textLength="{whoami_w:.1f}" '
                  f'lengthAdjust="spacing">whoami</text></g>')
     parts.append(f'<text x="{whoami_x + (len("whoami ")*CHAR_W):.1f}" y="{status_y:.1f}" font-size="13" '
-                 f'fill="{GREEN}" opacity="0">Taka'
+                 f'fill="{ACCENT}" opacity="0">Taka'
                  f'<set attributeName="opacity" to="1" begin="{answer_t:.2f}s"/></text>')
-parts.append(f'<rect x="{PAD+206}" y="{status_y-12:.1f}" width="8" height="14" fill="{GREEN}" '
+parts.append(f'<rect x="{PAD+206}" y="{status_y-12:.1f}" width="8" height="14" fill="{ACCENT}" '
              f'opacity="{1 if STATIC else 0}">'
              f'<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.5;0.51;1" '
              f'dur="1s" begin="{0 if STATIC else answer_t:.2f}s" repeatCount="indefinite"/></rect>')
