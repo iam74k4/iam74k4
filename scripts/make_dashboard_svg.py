@@ -1,17 +1,26 @@
 #!/usr/bin/env python3
 """
-Render the whole profile as one dashboard SVG (profile.svg).
+Render the profile board (profile.svg) in AstLog's design.
 
-One image instead of six stacked panels: GitHub's markdown CSS then has
-nothing to lay out, so the cards keep their exact positions and sizes at
-every container width. The link chips stay separate files -- an SVG embedded
-through <img> cannot carry clickable areas -- and remain the only pieces the
-README wraps in a markdown link.
+The board is laid out like the AstLog landing page: the copy column on the
+left (eyebrow, headline, lead), the star system on the right, a tally of
+counts underneath, then languages and stack. One black sheet, square
+corners, sections divided by hairlines rather than boxed into cards; white
+type on black with no accent colour (only the nebula has colour). Sans for
+the copy, monospace only for the English labels and numbers.
 
-Measured numbers come from data/commit-activity.json (fetch_commit_activity.py);
-the ASCII portrait is embedded from taka-ascii.svg as a nested <svg> whose
-viewBox crops away that panel's own window chrome, so the art is reused rather
-than regenerated (no Pillow needed here -- this script is stdlib only).
+The star system is baked once into cosmos.svg (make_cosmos_svg.mjs) and
+embedded here as a nested <svg>, the way the old board embedded the ASCII
+portrait, so this script stays stdlib-only for the daily Action. cosmos.svg
+darkens the sky under the copy column and records that box as data-copy;
+copy that would spill out of it stops the build (nothing may sit behind the
+text). Everything that changes daily -- the tally, languages, the date -- is
+drawn here from data/commit-activity.json (fetch_commit_activity.py).
+
+One image instead of loose panels: GitHub's markdown CSS then has nothing to
+lay out, so the board keeps its exact positions at every width. The links
+stay separate files (make_links_svg.py): an SVG behind <img> cannot carry
+clickable areas, and nothing on the board may look pushable.
 
 Usage: python scripts/make_dashboard_svg.py [data.json] [out.svg]
 """
@@ -19,238 +28,252 @@ import datetime
 import html
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..")
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "data", "commit-activity.json")
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "profile.svg")
-PORTRAIT = os.path.join(ROOT, "taka-ascii.svg")
+COSMOS = os.path.join(ROOT, "cosmos.svg")
 
-# palette -- same values as the panel generators
-BG = "#080d12"
-BG2 = "#0d141c"
-FRAME = "#22303d"
-GRAY = "#7e91a6"
-INK = "#cbd5e1"
-ACCENT = "#22d3ee"
-LEVELS = ["#111c26", "#0b4f5e", "#0e7490", "#15a5c4", "#22d3ee"]
+# palette -- AstLog's public/app.css :root with the default mono accent
+BG = "#0c0c0e"
+INK = "#f2f2f4"
+INK_MID = "#b4b4c2"
+INK_WEAK = "#8a8a96"
+LINE_OPACITY = 0.07     # --line: white at 7%
 
-# self-declared; everything else on the board is measured
+SANS = "'Helvetica Neue','Hiragino Sans','Noto Sans JP',system-ui,-apple-system,sans-serif"
+MONO = "ui-monospace,'SFMono-Regular','SF Mono',Menlo,Consolas,monospace"
+# AstLog's six static type steps (px). 11 is for English capitals only;
+# Japanese never goes below 12
+FS_LABEL, FS_META, FS_SM, FS_BASE, FS_MD = 11, 12, 13, 14, 15
+TRACKING = 0.16         # letter-spacing of the capital labels (em)
+MONO_ADVANCE = 0.6      # monospace advance as a fraction of font-size
+
+# self-declared; everything in the tally and the rows is measured
 NAME = "Taka"
 ROLE = "System Engineer"
-FOCUS = "discord-bots · ai · financial-data"
-LOCATION = "Japan · UTC+9"
-STACK = [".net", "django", "docker", "gcp", "nginx", "mysql",
-         "windows", "linux", "ubuntu", "vscode", "visual-studio"]
+LOCATION = "Japan"
+# the same sentence as AstLog's headline, broken at phrase boundaries
+HEADLINE = ["つくる工程", "そのものを、", "速くする。"]
+LEAD = ["個人でつくったアプリと、仕事で取り組んだ", "開発効率化を AstLog にまとめています。"]
+STACK = [".NET", "Django", "Docker", "Google Cloud", "nginx", "MySQL",
+         "Windows", "Linux", "Ubuntu", "VS Code", "Visual Studio"]
 
-FONT = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"
-CHAR = 0.6              # monospace advance as a fraction of font-size
+# AstLog's spring (--ease-spring) and arrival timing: the copy rises at once,
+# the tally after the orbits are traced (cosmos.svg T.count)
+SPRING = ("linear(0,0.008 1.5%,0.032 3%,0.068 4.5%,0.13 6.5%,0.246 9.5%,0.628 18.5%,"
+          "0.739 21.5%,0.834 24.5%,0.901 27%,0.965 30%,1.007 32.5%,1.043 35.5%,1.076 40.5%,"
+          "1.083 46%,1.071 52%,1.02 67%,1.003 75%,0.993 88%,0.995 99.5%,1)")
+STAGGER = 90
+COUNT_DELAY = 2600
 
-W = 924
-GAP = 14
-PAD = 16
-RAD = 10
-
-A_W, A_H = 352, 350                      # portrait card
-B_X, B_W = A_W + GAP, W - A_W - GAP      # whoami card
-ROW2_Y, C_H = A_H + GAP, 184             # commit activity, full width
-ROW3_Y = ROW2_Y + C_H + GAP
-D_W = (W - GAP) // 2                     # languages | hours
-E_X = D_W + GAP
-ROW3_H = 190
-FOOT_H = 26
-H = ROW3_Y + ROW3_H + FOOT_H
-
-CELL, CGAP = 12, 4                       # heatmap cell size / gutter
-DAY_LBL_W = 30
+W = 860
+PAD = 32
+# copy column
+EYEBROW_Y = 70
+H1_SIZE, H1_LH, H1_Y = 44, 55, 130
+LEAD_LH, LEAD_Y = 28, 290
+# tally, rows and footer
+TALLY_RULE = 372
+TALLY_NUM = TALLY_RULE + 46
+TALLY_LABEL = TALLY_NUM + 22
+ROWS_RULE = TALLY_LABEL + 34
+ROW_X = PAD + 112
+ROW_W = W - PAD - ROW_X
+ROW_LH = 20
 
 
 def esc(s):
     return html.escape(str(s), quote=False)
 
 
-def card(x, y, w, h):
-    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{RAD}" fill="url(#cbg)"/>'
-            f'<rect x="{x + 0.5}" y="{y + 0.5}" width="{w - 1}" height="{h - 1}" rx="{RAD}" '
-            f'fill="none" stroke="{FRAME}"/>')
+def is_wide(ch):
+    return ord(ch) >= 0x2E80
 
 
-def label(x, y, s):
-    return (f'<text x="{x}" y="{y}" fill="{GRAY}" font-size="11" font-weight="600" '
-            f'letter-spacing="1.4">{esc(s.upper())}</text>')
+def text_width(s, size, mono=False, tracking=0.0):
+    """A generous estimate: CJK at a full em, Latin at the wide end of system sans."""
+    if mono:
+        return len(s) * size * (MONO_ADVANCE + tracking)
+    em = 0.0
+    for ch in s:
+        if is_wide(ch):
+            em += 1.0
+        elif ch == " ":
+            em += 0.3
+        elif ch.isupper() or ch in "mw":
+            em += 0.7
+        else:
+            em += 0.56
+    return em * size + len(s) * size * tracking
 
 
-def text(x, y, s, fill=INK, size=13, anchor=None, weight=None, cls=None, delay=None):
-    a = f' text-anchor="{anchor}"' if anchor else ""
-    w = f' font-weight="{weight}"' if weight else ""
-    c = f' class="{cls}"' if cls else ""
-    d = f' style="animation-delay:{delay}s"' if delay is not None else ""
-    return (f'<text x="{x}" y="{y}" fill="{fill}" font-size="{size}"{a}{w}{c}{d}>'
-            f'{esc(s)}</text>')
+def wrap_balanced(items, max_chars, sep=" · "):
+    """Fewest lines that fit, then items spread so the lines end up about even.
+    An item longer than a line gets a line of its own rather than no answer."""
+    total = len(sep.join(items))
+    lines = max(1, -(-total // max_chars))
+    while lines < len(items):
+        target = total / lines
+        out, line = [], []
+        for item in items:
+            candidate = sep.join(line + [item])
+            if line and (len(candidate) > max_chars or len(sep.join(line)) >= target):
+                out.append(line)
+                line = [item]
+            else:
+                line.append(item)
+        out.append(line)
+        if len(out) <= lines and all(len(sep.join(l)) <= max_chars for l in out):
+            return out
+        lines += 1
+    return [[item] for item in items]
 
 
-def portrait_svg(x, y, size):
-    """The ASCII art from taka-ascii.svg, cropped to the art box (20,37,800,795)."""
-    src = open(PORTRAIT).read()
-    inner = src.split(">", 1)[1].rsplit("</svg>", 1)[0]     # drop its root <svg> tag
-    return (f'<svg x="{x}" y="{y}" width="{size}" height="{size * 795 / 800:.1f}" '
-            f'viewBox="20 37 800 795" preserveAspectRatio="xMidYMid meet">{inner}</svg>')
+def cosmos():
+    """cosmos.svg as a nested <svg>, plus the box its veil keeps dark."""
+    src = open(COSMOS, encoding="utf-8").read()
+    head_end = src.index(">", src.index("<svg")) + 1
+    head = src[:head_end]
+    attr = lambda name: re.search(rf'\s{name}="([^"]*)"', head).group(1)
+    width, height = float(attr("width")), float(attr("height"))
+    if width != W:
+        sys.exit(f"cosmos.svg is {width:g} wide; the board is {W}")
+    copy_box = [float(v) for v in attr("data-copy").split()]
+    inner = src[head_end:src.rindex("</svg>")]
+    return (f'<svg x="0" y="0" width="{width:g}" height="{height:g}" '
+            f'viewBox="0 0 {width:g} {height:g}">{inner}</svg>'), copy_box
 
 
 data = json.load(open(SRC))
 contribs = data["contributions"]
 total = data.get("total", {}).get("lastYear", sum(c["count"] for c in contribs))
 stats = data.get("stats", {})
-langs = data.get("languages", [])[:6]
+langs = [(n, p) for n, p in data.get("languages", []) if p >= 1][:6]
 hours = data.get("hours", [0] * 24)
 tz = data.get("tz_offset", 9)
 peak = max(range(24), key=lambda h: hours[h]) if any(hours) else 0
 
-parts = [
+art, (_, _, copy_right, copy_bottom) = cosmos()
+
+# the copy has to stay on the dark ground cosmos.svg lays under it
+copy_lines = ([(PAD, EYEBROW_Y, text_width(f"{ROLE} — {LOCATION}".upper(), FS_LABEL, True, TRACKING))]
+              + [(PAD - 2, H1_Y + i * H1_LH, text_width(s, H1_SIZE)) for i, s in enumerate(HEADLINE)]
+              + [(PAD, LEAD_Y + i * LEAD_LH, text_width(s, FS_MD)) for i, s in enumerate(LEAD)])
+for x, y, w in copy_lines:
+    if x + w > copy_right or y > copy_bottom:
+        sys.exit(f"copy at y={y} runs to x={x + w:.0f}; cosmos.svg darkens up to "
+                 f"x={copy_right:g}, y={copy_bottom:g} (widen COPY in make_cosmos_svg.mjs or shorten the line)")
+
+
+def rule(y):
+    return (f'<line x1="{PAD}" y1="{y + 0.5}" x2="{W - PAD}" y2="{y + 0.5}" '
+            f'stroke="#fff" stroke-opacity="{LINE_OPACITY}"/>')
+
+
+def text(x, y, s, cls, extra=""):
+    return f'<text x="{x}" y="{y}" class="{cls}"{extra}>{esc(s)}</text>'
+
+
+def tags(x, y, items):
+    """One row of English labels (markup) joined by middle dots (AstLog's tag row)."""
+    body = "".join(('<tspan class="dim"> · </tspan>' if i else "") + item
+                   for i, item in enumerate(items))
+    return f'<text x="{x}" y="{y}" class="tags">{body}</text>'
+
+
+STYLE = f'''<style>
+text{{font-family:{SANS}}}
+.eyebrow,.label{{font-family:{MONO};font-size:{FS_LABEL}px;letter-spacing:{TRACKING}em;fill:{INK_WEAK}}}
+.h1{{font-size:{H1_SIZE}px;font-weight:600;letter-spacing:-.02em;font-feature-settings:'palt';fill:{INK}}}
+.lead{{font-size:{FS_MD}px;fill:{INK_MID}}}
+.num{{font-size:30px;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums;fill:{INK}}}
+.tags{{font-family:{MONO};font-size:{FS_META}px;fill:{INK_MID}}}
+.dim{{fill:{INK_WEAK}}}
+.name{{font-size:{FS_BASE}px;font-weight:600;fill:{INK}}}
+.role{{font-size:{FS_SM}px;fill:{INK_MID}}}
+@keyframes rise{{from{{opacity:0;transform:translateY(12px)}}}}
+@media (prefers-reduced-motion:no-preference){{.rise{{animation:rise 640ms {SPRING} backwards}}}}
+</style>'''
+
+# the height is known only once the rows have wrapped, so the root goes on last
+parts = [art]
+
+# ------------------------------------------------------------------ copy
+parts.append(text(PAD, EYEBROW_Y, f"{ROLE} — {LOCATION}".upper(), "eyebrow rise"))
+for i, line in enumerate(HEADLINE):
+    parts.append(text(PAD - 2, H1_Y + i * H1_LH, line, "h1 rise",
+                      f' style="animation-delay:{(i + 1) * STAGGER}ms"'))
+for i, line in enumerate(LEAD):
+    parts.append(text(PAD, LEAD_Y + i * LEAD_LH, line, "lead rise",
+                      f' style="animation-delay:{(len(HEADLINE) + 1) * STAGGER}ms"'))
+
+# ------------------------------------------------------------------ tally
+tally = [(f"{total:,}", "COMMITS · 365D"),
+         (f'{stats.get("current_streak", 0)}', "DAY STREAK"),
+         (f'{stats.get("best_day", 0)}', "MAX / DAY"),
+         (f"{peak:02d}:00", f"PEAK · UTC+{tz}")]
+parts.append(rule(TALLY_RULE))
+cell = (W - PAD * 2) / len(tally)
+for i, (value, cap) in enumerate(tally):
+    x = round(PAD + i * cell, 1)
+    parts.append(f'<g class="rise" style="animation-delay:{COUNT_DELAY + i * STAGGER}ms">'
+                 f'{text(x, TALLY_NUM, value, "num")}{text(x, TALLY_LABEL, cap, "label")}</g>')
+
+# ------------------------------------------------------------ languages
+# one hairline split by byte share; no colours, just steps of the ink
+parts.append(rule(ROWS_RULE))
+bar_y = ROWS_RULE + 28
+parts.append(text(PAD, bar_y + 4, "LANGUAGES", "label"))
+gap, inks = 3, [1, 0.62, 0.44, 0.32, 0.24, 0.18]
+share = sum(p for _, p in langs) or 1
+bx = ROW_X
+for i, (_, pct) in enumerate(langs):
+    seg = max(2, pct / share * (ROW_W - gap * (len(langs) - 1)))
+    parts.append(f'<rect x="{bx:.1f}" y="{bar_y - 1}" width="{seg:.1f}" height="2" '
+                 f'fill="{INK}" fill-opacity="{inks[i]}"/>')
+    bx += seg + gap
+max_chars = int(ROW_W // (FS_META * MONO_ADVANCE))
+legend = [f'{esc(name)}<tspan class="dim"> {pct:.1f}%</tspan>' for name, pct in langs]
+y, done = bar_y + 22, 0
+for line in wrap_balanced([f"{name} {pct:.1f}%" for name, pct in langs], max_chars):
+    parts.append(tags(ROW_X, y, legend[done:done + len(line)]))
+    done += len(line)
+    y += ROW_LH
+
+# ---------------------------------------------------------------- stack
+y += 10
+parts.append(text(PAD, y, "STACK", "label"))
+for line in wrap_balanced(STACK, max_chars):
+    parts.append(tags(ROW_X, y, [esc(item) for item in line]))
+    y += ROW_LH
+
+# --------------------------------------------------------------- footer
+foot_rule = y + 4
+foot_y = foot_rule + 30
+H = foot_y + 22
+parts.append(rule(foot_rule))
+parts.append(f'<text x="{PAD}" y="{foot_y}"><tspan class="name">{esc(NAME)}</tspan>'
+             f'<tspan class="role" dx="10">{esc(ROLE)}</tspan></text>')
+parts.append(text(W - PAD, foot_y,
+                  f"PUBLIC REPOS · DEFAULT BRANCHES · UPDATED {datetime.date.today().isoformat()}",
+                  "label", ' text-anchor="end"'))
+title = (f"{NAME} — {ROLE}。{''.join(HEADLINE)}{''.join(LEAD)} "
+         f"過去365日のコミット {total:,}、連続 {stats.get('current_streak', 0)} 日、"
+         f"1日の最多 {stats.get('best_day', 0)}、よく書く時刻 {peak:02d}:00（UTC+{tz}）。")
+svg = "".join([
     f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
-    f'font-family="{FONT}">',
-    f'''<style>
-  .fade {{ opacity:0; animation:fade .45s ease-out both; }}
-  .cell {{ opacity:0; transform-box:fill-box; transform-origin:center;
-           animation:pop .45s ease-out both; }}
-  .bar  {{ transform-box:fill-box; transform-origin:left center;
-           animation:grow .8s cubic-bezier(.2,.8,.2,1) both; }}
-  .hbar {{ transform-box:fill-box; transform-origin:bottom center;
-           animation:rise .6s cubic-bezier(.2,.8,.2,1) both; }}
-  @keyframes fade {{ from{{opacity:0}} to{{opacity:1}} }}
-  @keyframes pop  {{ 0%{{opacity:0;transform:scale(.2)}} 60%{{opacity:1;transform:scale(1.1)}}
-                     100%{{opacity:1;transform:scale(1)}} }}
-  @keyframes grow {{ from{{transform:scaleX(0)}} to{{transform:scaleX(1)}} }}
-  @keyframes rise {{ from{{transform:scaleY(0)}} to{{transform:scaleY(1)}} }}
-  @media (prefers-reduced-motion: reduce) {{
-    .fade,.cell,.bar,.hbar {{ opacity:1 !important; transform:none !important;
-                              animation:none !important; }} }}
-</style>''',
-    f'<defs><linearGradient id="cbg" x1="0" y1="0" x2="0" y2="1">'
-    f'<stop offset="0" stop-color="{BG2}"/><stop offset="1" stop-color="{BG}"/>'
-    f'</linearGradient></defs>',
-]
-
-# ---------------------------------------------------------------- portrait
-parts.append(card(0, 0, A_W, A_H))
-parts.append(portrait_svg(PAD, PAD, A_W - PAD * 2))
-
-# ------------------------------------------------------------------ whoami
-bx = B_X + PAD
-parts.append(card(B_X, 0, B_W, A_H))
-parts.append(label(bx, 34, "whoami"))
-parts.append(text(bx, 76, NAME, ACCENT, 30, weight=700, cls="fade", delay=0.1))
-parts.append(text(bx + len(NAME) * 30 * CHAR + 14, 76, f"— {ROLE}", INK, 15,
-                  cls="fade", delay=0.2))
-parts.append(text(bx, 102, FOCUS, GRAY, 13, cls="fade", delay=0.3))
-parts.append(text(bx, 124, LOCATION, GRAY, 13, cls="fade", delay=0.35))
-parts.append(f'<line x1="{bx}" y1="146" x2="{B_X + B_W - PAD}" y2="146" stroke="{FRAME}"/>')
-
-kpis = [(f"{total:,}", "commits · 365d"),
-        (f'{stats.get("current_streak", 0)}d', "current streak"),
-        (f'{stats.get("best_day", 0)}', "max / day"),
-        (f"{peak:02d}:00", f"peak hour (utc+{tz})")]
-for i, (value, cap) in enumerate(kpis):
-    kx = bx + i * ((B_W - PAD * 2) // len(kpis))
-    parts.append(text(kx, 192, value, ACCENT, 26, weight=700, cls="fade", delay=0.4 + i * 0.08))
-    parts.append(text(kx, 210, cap, GRAY, 11, cls="fade", delay=0.45 + i * 0.08))
-
-parts.append(label(bx, 252, "stack"))
-cx, cy, avail = bx, 262, B_W - PAD * 2
-for i, item in enumerate(STACK):
-    cw = len(item) * 12 * CHAR + 20
-    if cx + cw > bx + avail:
-        cx, cy = bx, cy + 28
-    parts.append(f'<g class="fade" style="animation-delay:{0.6 + i * 0.04:.2f}s">'
-                 f'<rect x="{cx}" y="{cy}" width="{cw:.0f}" height="22" rx="6" fill="none" '
-                 f'stroke="{FRAME}"/>'
-                 f'{text(cx + 10, cy + 15, item, INK, 12)}</g>')
-    cx += cw + 6
-
-# --------------------------------------------------------- commit activity
-parts.append(card(0, ROW2_Y, W, C_H))
-parts.append(label(PAD, ROW2_Y + 28, "commit activity — last 12 months"))
-parts.append(
-    f'<text x="{W - PAD}" y="{ROW2_Y + 28}" font-size="12" text-anchor="end" class="fade" '
-    f'style="animation-delay:.5s">'
-    f'<tspan fill="{ACCENT}" font-weight="700">{total:,}</tspan>'
-    f'<tspan fill="{GRAY}"> commits · streak </tspan>'
-    f'<tspan fill="{ACCENT}" font-weight="700">{stats.get("current_streak", 0)}d</tspan>'
-    f'<tspan fill="{GRAY}"> · longest </tspan>'
-    f'<tspan fill="{ACCENT}" font-weight="700">{stats.get("longest_streak", 0)}d</tspan>'
-    f'<tspan fill="{GRAY}"> · max </tspan>'
-    f'<tspan fill="{ACCENT}" font-weight="700">{stats.get("best_day", 0)}</tspan>'
-    f'<tspan fill="{GRAY}">/day</tspan></text>')
-
-gx, gy = PAD + DAY_LBL_W, ROW2_Y + 62
-weeks = (len(contribs) + 6) // 7
-start = datetime.date.fromisoformat(contribs[0]["date"])
-last_month, last_lbl = None, -3
-for wk in range(weeks):
-    d = start + datetime.timedelta(days=wk * 7)
-    if d.month != last_month:
-        last_month = d.month
-        if wk - last_lbl >= 3:
-            parts.append(text(gx + wk * (CELL + CGAP), gy - 8,
-                              d.strftime("%b"), GRAY, 11))
-            last_lbl = wk
-for name, row in [("Mon", 1), ("Wed", 3), ("Fri", 5)]:
-    parts.append(text(PAD, gy + row * (CELL + CGAP) + CELL - 2, name, GRAY, 11))
-for i, c in enumerate(contribs):
-    wk, row = i // 7, i % 7
-    delay = 0.35 + (wk + row * 0.5) / weeks * 1.1
-    parts.append(
-        f'<rect class="cell" x="{gx + wk * (CELL + CGAP)}" y="{gy + row * (CELL + CGAP)}" '
-        f'width="{CELL}" height="{CELL}" rx="3" fill="{LEVELS[c["level"]]}" '
-        f'style="animation-delay:{delay:.2f}s"/>')
-
-# -------------------------------------------------------------- languages
-parts.append(card(0, ROW3_Y, D_W, ROW3_H))
-parts.append(label(PAD, ROW3_Y + 28, "languages (by bytes)"))
-track_x, track_w = PAD + 96, D_W - PAD * 2 - 96 - 52
-for i, (name, pct) in enumerate(langs):
-    ly = ROW3_Y + 54 + i * 23
-    parts.append(text(PAD, ly + 4, name.lower(), INK, 12.5))
-    parts.append(f'<rect x="{track_x}" y="{ly - 4}" width="{track_w}" height="8" rx="4" '
-                 f'fill="{LEVELS[0]}"/>')
-    parts.append(f'<rect class="bar" x="{track_x}" y="{ly - 4}" '
-                 f'width="{max(track_w * pct / 100, 3):.1f}" height="8" rx="4" fill="{ACCENT}" '
-                 f'style="animation-delay:{0.3 + i * 0.07:.2f}s"/>')
-    parts.append(text(D_W - PAD, ly + 4, f"{pct:.1f}%", GRAY, 12, anchor="end"))
-
-# ------------------------------------------------------------ commits/hour
-parts.append(card(E_X, ROW3_Y, D_W, ROW3_H))
-parts.append(label(E_X + PAD, ROW3_Y + 28, f"commits by hour (utc+{tz})"))
-base, hmax = ROW3_Y + 140, max(hours) or 1
-bw, bpitch = 12, (D_W - PAD * 2 - 12) / 24
-for h, n in enumerate(hours):
-    bh = max(n / hmax * 74, 2)
-    parts.append(f'<rect class="hbar" x="{E_X + PAD + h * bpitch:.1f}" y="{base - bh:.1f}" '
-                 f'width="{bw}" height="{bh:.1f}" rx="2" '
-                 f'fill="{ACCENT if h == peak else LEVELS[2]}" '
-                 f'style="animation-delay:{0.3 + h * 0.02:.2f}s"/>')
-for h in (0, 6, 12, 18, 23):
-    parts.append(text(E_X + PAD + h * bpitch + bw / 2, base + 18, f"{h}", GRAY, 11,
-                      anchor="middle"))
-parts.append(
-    f'<text x="{E_X + PAD}" y="{ROW3_Y + 176}" font-size="12.5" class="fade" '
-    f'style="animation-delay:.8s"><tspan fill="{GRAY}">peak </tspan>'
-    f'<tspan fill="{ACCENT}" font-weight="700">{peak:02d}:00</tspan>'
-    f'<tspan fill="{GRAY}"> · {hours[peak]} commits · </tspan>'
-    f'<tspan fill="{INK}">{sum(hours[9:18])}</tspan>'
-    f'<tspan fill="{GRAY}"> of {sum(hours)} in office hours</tspan></text>')
-
-# ------------------------------------------------------------------ footer
-parts.append(text(PAD, H - 8, "commits on public repos (default branches), counted "
-                  "through the GitHub REST API", GRAY, 11))
-parts.append(text(W - PAD, H - 8, f"updated {datetime.date.today().isoformat()}",
-                  GRAY, 11, anchor="end"))
-
-parts.append("</svg>")
-
-svg = "".join(parts)
-with open(OUT, "w") as f:
+    f'xml:lang="ja" role="img" aria-labelledby="title">',
+    f'<title id="title">{esc(title)}</title>',
+    STYLE,
+    f'<rect width="{W}" height="{H}" fill="{BG}"/>',
+    *parts,
+    "</svg>",
+])
+with open(OUT, "w", encoding="utf-8") as f:
     f.write(svg)
-print(f"wrote {OUT} {W}x{H} {len(svg)} bytes; "
+print(f"wrote {OUT} {W}x{H} {len(svg.encode()) // 1024}KB; "
       f"{total} commits, {len(langs)} languages, peak hour {peak}")
