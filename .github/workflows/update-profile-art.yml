@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.11"
+          python-version: "3.15"
 
       # both scripts are stdlib-only; no pip install needed
 
