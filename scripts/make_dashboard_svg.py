@@ -16,14 +16,19 @@ there are no gradients or shadows. Every colour is a Primer token
 (@primer/primitives 11.10), the accent included: fgColor-success, with the
 contribution graph's own greens for the heatmap.
 
-Measured numbers come from data/commit-activity.json (fetch_commit_activity.py);
-the ASCII portrait is embedded from taka-ascii.svg as a nested <svg> whose
-viewBox crops away that panel's own window chrome, and is recoloured per theme,
-so the art is reused rather than regenerated (no Pillow needed here -- this
-script is stdlib only).
+Measured numbers come from data/commit-activity.json (fetch_commit_activity.py).
+The top-left card shows the tracks in data/music.json ("On repeat") as a
+carousel -- CSS only, so it runs inside GitHub's <img> too -- that slides one
+cover left every few seconds, their covers embedded as data: URIs -- an SVG behind <img> cannot load anything
+from outside itself -- from assets/music/, which fetch_music_art.py fills.
+With no tracks listed it falls back to the ASCII portrait, embedded from
+taka-ascii.svg as a nested <svg> whose viewBox crops away that panel's own
+window chrome, recoloured per theme. Either way nothing is regenerated here
+(no Pillow needed -- this script is stdlib only).
 
 Usage: python scripts/make_dashboard_svg.py [data.json] [dark.svg] [light.svg]
 """
+import base64
 import datetime
 import html
 import json
@@ -37,6 +42,8 @@ SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "data", "commit-a
 OUT_DARK = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "profile.svg")
 OUT_LIGHT = sys.argv[3] if len(sys.argv) > 3 else os.path.join(ROOT, "profile-light.svg")
 PORTRAIT = os.path.join(ROOT, "taka-ascii.svg")
+MUSIC = os.path.join(ROOT, "data", "music.json")
+MAX_TRACKS = 6
 
 # Primer tokens: bg = bgColor-default (the page itself), border = borderColor-default,
 # fg / muted = fgColor-default / fgColor-muted, accent = fgColor-success,
@@ -85,6 +92,9 @@ FOOT_H = 30
 H = ROW3_Y + ROW3_H + FOOT_H
 
 CELL, CGAP = 12, 4                       # heatmap cell size / gutter
+COVER, COVER_GAP = 176, 16               # on-repeat carousel: cover size / gutter
+HOLD, SLIDE, XFADE = 2.8, 0.8, 0.25      # seconds: cover held, sliding, caption fade
+DIM = 0.4                                # opacity of the covers off centre
 DAY_LBL_W = 32
 
 
@@ -104,6 +114,81 @@ def text(x, y, s, fill, size=13, cls="sans", anchor=None, weight=None, delay=Non
             f'{esc(s)}</text>')
 
 
+def fit(s, size, width, mono=False):
+    """Cut s with an ellipsis if its estimated advance runs past width px."""
+    adv = size * (0.6 if mono else 0.58)
+    if len(s) * adv <= width:
+        return s
+    return s[:max(1, int(width / adv) - 1)].rstrip() + "…"
+
+
+def load_tracks():
+    """The listed tracks whose cover is on disk, each with its JPEG as base64."""
+    if not os.path.exists(MUSIC):
+        return []
+    with open(MUSIC) as f:
+        tracks = json.load(f).get("tracks", [])
+    out = []
+    for tr in tracks:
+        path = os.path.join(ROOT, tr.get("art", ""))
+        if tr.get("title") and os.path.isfile(path):
+            with open(path, "rb") as f:
+                out.append({**tr, "b64": base64.b64encode(f.read()).decode()})
+    return out[:MAX_TRACKS]
+
+
+def carousel_css(n):
+    """Keyframes for the cover strip and each track's caption. Every cover holds
+    the centre for HOLD s, then the strip slides one pitch left in SLIDE s; the
+    strip repeats the first covers after the last, so the jump from 100% back
+    to 0% lands on an identical frame. Reduced motion: the first track, still."""
+    if n < 2:
+        return ""
+    pitch, step = COVER + COVER_GAP, HOLD + SLIDE
+    total = n * step
+
+    def pc(sec):
+        return f"{sec / total * 100:.3f}%"
+
+    ease = "animation-timing-function:cubic-bezier(.65,0,.35,1)"
+    k = []
+    for i in range(n):
+        k.append(f"{pc(i * step)}{{transform:translateX({-i * pitch}px)}}")
+        k.append(f"{pc(i * step + HOLD)}{{transform:translateX({-i * pitch}px);{ease}}}")
+    k.append(f"100%{{transform:translateX({-n * pitch}px)}}")
+    css = [f".strip {{ animation:strip {total:.2f}s linear infinite; }}",
+           f"@keyframes strip {{ {' '.join(k)} }}"]
+    # slot k (class s<k+1>) brightens while it slides into the centre and dims
+    # as it leaves; slot n takes over from slot 0 at the loop point
+    for slot in range(n + 1):
+        on, off = slot * step, slot * step + HOLD
+        if slot == 0:
+            stops = [("0%", 1), (pc(off), 1), (pc(off + SLIDE), DIM), ("100%", DIM)]
+        elif slot == n:
+            stops = [("0%", DIM), (pc(on - SLIDE), DIM), ("100%", 1)]
+        else:
+            stops = [("0%", DIM), (pc(on - SLIDE), DIM), (pc(on), 1), (pc(off), 1),
+                     (pc(off + SLIDE), DIM), ("100%", DIM)]
+        css.append(f".s{slot + 1} {{ animation:s{slot + 1} {total:.2f}s linear infinite; }}")
+        css.append(f"@keyframes s{slot + 1} {{ "
+                   + " ".join(f"{p}{{opacity:{o}}}" for p, o in stops) + " }")
+    for j in range(n):
+        on, off = j * step, j * step + HOLD
+        if j == 0:
+            stops = [("0%", 1), (pc(off), 1), (pc(off + XFADE), 0), (pc(total - XFADE), 0),
+                     ("100%", 1)]
+        else:
+            stops = [("0%", 0), (pc(on - XFADE), 0), (pc(on), 1), (pc(off), 1),
+                     (pc(off + XFADE), 0), ("100%", 0)]
+        css.append(f".np{j} {{ animation:np{j} {total:.2f}s linear infinite; }}")
+        css.append(f"@keyframes np{j} {{ "
+                   + " ".join(f"{p}{{opacity:{o}}}" for p, o in stops) + " }")
+    css.append("@media (prefers-reduced-motion: reduce) { .strip,"
+               + ",".join([f".np{j}" for j in range(n)] + [f".s{k + 1}" for k in range(n + 1)])
+               + " { animation:none !important; } }")
+    return "\n  ".join(css)
+
+
 def portrait_svg(t, x, y, size):
     """The ASCII art from taka-ascii.svg, cropped to the art box (20,37,800,795),
     with its own background dropped so the card shows through."""
@@ -118,7 +203,7 @@ def portrait_svg(t, x, y, size):
             f'viewBox="20 37 800 795" preserveAspectRatio="xMidYMid meet">{inner}</svg>')
 
 
-def render(t, data):
+def render(t, data, tracks):
     contribs = data["contributions"]
     total = data.get("total", {}).get("lastYear", sum(c["count"] for c in contribs))
     stats = data.get("stats", {})
@@ -159,19 +244,77 @@ def render(t, data):
   @keyframes fade {{ from{{opacity:0}} to{{opacity:1}} }}
   @keyframes pop  {{ from{{opacity:0;transform:scale(.4)}} to{{opacity:1;transform:scale(1)}} }}
   @keyframes grow {{ from{{transform:scaleX(0)}} to{{transform:scaleX(1)}} }}
+  .eq   {{ transform-box:fill-box; transform-origin:bottom center;
+           animation:eq .9s ease-in-out infinite alternate; }}
   @keyframes rise {{ from{{transform:scaleY(0)}} to{{transform:scaleY(1)}} }}
+  @keyframes eq   {{ from{{transform:scaleY(.3)}} to{{transform:scaleY(1)}} }}
   @media (prefers-reduced-motion: reduce) {{
-    .fade,.cell,.bar,.hbar {{ opacity:1 !important; transform:none !important;
-                              animation:none !important; }} }}
+    .fade,.cell,.bar,.hbar,.eq {{ opacity:1 !important; transform:none !important;
+                                  animation:none !important; }} }}
+  {carousel_css(len(tracks))}
 </style>''',
         # the page colour behind everything, so the image is never see-through
         f'<rect width="{W}" height="{H}" fill="{bg}"/>',
     ]
 
-    # ------------------------------------------------------------ portrait
-    p = 18
+    # ---------------------------------------------- on repeat (or portrait)
     parts.append(card(0, 0, A_W, A_H))
-    parts.append(portrait_svg(t, p, p + 1, A_W - p * 2))
+    if tracks:
+        parts.append(heading(PAD, 34, "On repeat"))
+        for k, (h, dur) in enumerate([(10, .8), (14, .65), (8, .95)]):   # equalizer
+            ex = A_W - PAD - 13 + k * 5
+            parts.append(f'<rect class="eq" x="{ex}" y="{34 - h}" width="3" height="{h}" '
+                         f'rx="1" fill="{accent}" style="animation-duration:{dur}s;'
+                         f'animation-delay:-{k * .3:.1f}s"/>')
+        n, y0 = len(tracks), 52
+        cx = (A_W - COVER) // 2                  # left edge of the centred cover
+        pitch = COVER + COVER_GAP
+        # each cover is embedded once and reused by every slot on the strip
+        parts.append(
+            "<defs>"
+            + "".join(f'<image id="art{j}" width="{COVER}" height="{COVER}" '
+                      f'preserveAspectRatio="xMidYMid slice" '
+                      f'href="data:image/jpeg;base64,{tr["b64"]}"/>'
+                      for j, tr in enumerate(tracks))
+            + f'<clipPath id="win"><rect x="1" y="{y0 - 1}" width="{A_W - 2}" '
+              f'height="{COVER + 2}"/></clipPath></defs>')
+        # slot k shows track k mod n: one neighbour peeks in on each side, and
+        # the slots past the last track repeat the first ones for a seamless loop
+        covers = []
+        for k in (range(-1, n + 2) if n > 1 else range(1)):
+            x = cx + k * pitch
+            covers.append(
+                f'<clipPath id="cv{k + 1}"><rect x="{x}" y="{y0}" width="{COVER}" '
+                f'height="{COVER}" rx="10"/></clipPath>'
+                f'<g class="s{k + 1}" opacity="{1 if k == 0 else DIM}">'
+                f'<g clip-path="url(#cv{k + 1})"><use href="#art{k % n}" x="{x}" y="{y0}"/></g>'
+                f'<rect x="{x + 0.5}" y="{y0 + 0.5}" width="{COVER - 1}" height="{COVER - 1}" '
+                f'rx="10" fill="none" stroke="{border}"/></g>')
+        parts.append(f'<g class="fade" style="animation-delay:.1s"><g clip-path="url(#win)">'
+                     f'<g class="strip">{"".join(covers)}</g></g></g>')
+
+        # captions cross-fade in step with the strip (np<j> keyframes)
+        mid, ty, tw = A_W / 2, y0 + COVER + 30, A_W - PAD * 2
+        caps = []
+        for j, tr in enumerate(tracks):
+            meta = " · ".join(v for v in (tr.get("kind"), tr.get("year"), tr.get("duration")) if v)
+            caps.append(
+                f'<g class="np{j}" opacity="{1 if j == 0 else 0}">'
+                f'{text(mid, ty, fit(tr["title"], 16, tw), fg, 16, anchor="middle", weight=600)}'
+                f'{text(mid, ty + 21, fit(tr.get("artist", ""), 13, tw), muted, 13, anchor="middle")}'
+                + (text(mid, ty + 41, fit(meta, 12, tw, mono=True), muted, 12, cls="mono",
+                        anchor="middle") if meta else "")
+                + "</g>")
+        if n > 1:                                # page dots, the current one in accent
+            for j in range(n):
+                dx = mid + (j - (n - 1) / 2) * 12
+                caps.append(f'<circle cx="{dx}" cy="{ty + 64}" r="3" fill="{border}"/>'
+                            f'<circle class="np{j}" cx="{dx}" cy="{ty + 64}" r="3" '
+                            f'fill="{accent}" opacity="{1 if j == 0 else 0}"/>')
+        parts.append(f'<g class="fade" style="animation-delay:.2s">{"".join(caps)}</g>')
+    else:
+        p = 18
+        parts.append(portrait_svg(t, p, p + 1, A_W - p * 2))
 
     # ------------------------------------------------------------- profile
     bx, bw = B_X + PAD, B_W - PAD * 2
@@ -307,9 +450,11 @@ def render(t, data):
 
 
 data = json.load(open(SRC))
+tracks = load_tracks()
 for theme, out in (("dark", OUT_DARK), ("light", OUT_LIGHT)):
-    svg, total, nlang, peak = render(THEMES[theme], data)
+    svg, total, nlang, peak = render(THEMES[theme], data, tracks)
     with open(out, "w") as f:
         f.write(svg)
     print(f"wrote {out} ({theme}) {W}x{H} {len(svg)} bytes; "
-          f"{total} commits, {nlang} languages, peak hour {peak}")
+          f"{total} commits, {nlang} languages, peak hour {peak}, "
+          f"{len(tracks) or 'no'} tracks")

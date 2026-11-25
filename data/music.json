@@ -1,0 +1,37 @@
+{
+  "tracks": [
+    {
+      "term": "Martin Garrix No Sleep",
+      "track_id": 1453438470,
+      "title": "No Sleep",
+      "artist": "Martin Garrix, Bonn",
+      "kind": "Single",
+      "year": "2019",
+      "duration": "3:27",
+      "url": "https://music.apple.com/us/album/no-sleep-feat-bonn/1453438469?i=1453438470",
+      "art": "assets/music/1453438470.jpg"
+    },
+    {
+      "term": "Martin Garrix High On Life",
+      "track_id": 1416740913,
+      "title": "High on Life",
+      "artist": "Martin Garrix, Bonn",
+      "kind": "Single",
+      "year": "2018",
+      "duration": "3:51",
+      "url": "https://music.apple.com/us/album/high-on-life-feat-bonn/1416740613?i=1416740913",
+      "art": "assets/music/1416740913.jpg"
+    },
+    {
+      "term": "Avicii The Nights",
+      "track_id": 1440829549,
+      "title": "The Nights",
+      "artist": "Avicii",
+      "kind": "EP",
+      "year": "2014",
+      "duration": "2:57",
+      "url": "https://music.apple.com/us/album/the-nights/1440829274?i=1440829549",
+      "art": "assets/music/1440829549.jpg"
+    }
+  ]
+}
