@@ -37,7 +37,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Render the dashboard SVG
+      - name: Render the dashboard SVGs (dark + light)
         run: python scripts/make_dashboard_svg.py
 
       # the stacked-panel versions are not on the README any more, but they are
@@ -52,4 +52,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: refresh commit-activity graph [skip ci]"
-          file_pattern: "data/commit-activity.json profile.svg contrib-heatmap.svg stats.svg"
+          file_pattern: "data/commit-activity.json profile.svg profile-light.svg contrib-heatmap.svg stats.svg"

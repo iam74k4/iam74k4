@@ -1,7 +1,7 @@
 """
 Convert the profile avatar into a CLEAN, monochrome ASCII-art SVG (one
-light-gray color, subject isolated on a dark background) that "types" itself
-in like a terminal, then holds.
+light-gray color, subject isolated on GitHub's dark page background) that
+"types" itself in like a terminal, then holds.
 
 Monochrome is deliberate -- per-character rainbow color is what makes ASCII
 portraits look noisy. One fill color + a good density ramp + high contrast
@@ -12,13 +12,14 @@ GitHub renders SVGs embedded via <img> and runs their SMIL animations there
 small block cursor riding the wipe edge, staggered top -> bottom, so the whole
 portrait prints once and freezes.
 
-The source avatar is a flat illustration on a pure-white background, so no
-background removal is needed -- white maps straight to blank via WHITE_FLOOR.
+The source avatar is the current GitHub avatar: a flat illustration with a
+transparent background. It is flattened onto white, so the background maps
+straight to blank via WHITE_FLOOR -- no background removal needed.
 
 Usage: python scripts/make_ascii_svg.py [input.png] [output.svg]
 Style adapted from AVIVASHISHTA29/AVIVASHISHTA29.
 """
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageFilter
 import html
 import os
 import sys
@@ -32,12 +33,15 @@ ROWS = 53
 CELL_W = 8
 CELL_H = 15
 RAMP = " .:10"         # bright(sparse) -> dark(dense); leading space clears bg.
-# 0 has more ink than 1, so the dark end is 0; ":" carries the midtone that keeps
-# the jaw and cheek readable once the board scales the portrait down.
+# 0 has more ink than 1, so the dark end is 0: hair and shirt folds print as 0,
+# the grey hair highlights and the shirt as 1, the skin as sparse dots.
 
-# the avatar is a flat illustration: pure-white bg (255), light skin (~230),
-# near-black hair/shirt (~35). WHITE_FLOOR sits between skin and bg so the
-# face renders in sparse chars while the background stays blank.
+# the avatar is a flat illustration: transparent bg (-> white, 255), skin
+# (~205), near-black hair/shirt (~25-40). WHITE_FLOOR sits between skin and bg
+# so the face renders in sparse chars while the background stays blank.
+CROP = (40, 18, 440, 418)   # square head-and-shoulders box of the 460px avatar
+LINE_BOOST = 3        # MinFilter size: thickens thin dark lines (the glasses)
+                      # so they survive the 100x53 downsample
 CONTRAST = 1.0
 BRIGHTNESS = 1.0
 GAMMA = 1.0
@@ -51,12 +55,13 @@ ART_H = ROWS * CELL_H
 CANVAS_W = ART_W + PAD * 2
 CANVAS_H = TITLEBAR_H + ART_H + STATUS_H + PAD
 
-BG = "#080d12"
-BG2 = "#0d141c"
-FRAME = "#22303d"
-TITLE_TEXT = "#7e91a6"
-INK = "#cbd5e1"      # the single ascii color
-ACCENT = "#22d3ee"    # accent: the same cyan as the contribution heatmap
+# GitHub's dark theme (Primer): page background, border, muted text, and
+# fgColor-success -- the green of the contribution graph -- as the accent
+BG = "#0d1117"
+FRAME = "#3d444d"
+TITLE_TEXT = "#9198a1"
+INK = "#d1d9e0"      # the single ascii color
+ACCENT = "#3fb950"
 CURSOR = ACCENT
 
 # ---- reveal timing (one-shot; a cursor rasters top -> bottom) -------------
@@ -64,7 +69,10 @@ ROW_DUR = 0.11
 STAGGER = 0.11       # == ROW_DUR -> a single cursor sweeping down
 
 # ---- 1. sample the image into a COLS x ROWS grayscale grid ----------------
-im = Image.open(SRC).convert("L")               # grayscale
+im = Image.open(SRC).convert("RGBA")
+white = Image.new("RGBA", im.size, (255, 255, 255, 255))
+im = Image.alpha_composite(white, im).convert("L")   # flatten onto white, grayscale
+im = im.crop(CROP).filter(ImageFilter.MinFilter(LINE_BOOST))
 im = ImageEnhance.Brightness(im).enhance(BRIGHTNESS)
 im = ImageEnhance.Contrast(im).enhance(CONTRAST)
 im = im.resize((COLS, ROWS), Image.LANCZOS)
@@ -95,12 +103,7 @@ parts.append(
     f'viewBox="0 0 {CANVAS_W} {CANVAS_H}" font-family="ui-monospace, SFMono-Regular, '
     f'Menlo, Consolas, monospace">'
 )
-parts.append('<defs>'
-             f'<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">'
-             f'<stop offset="0" stop-color="{BG2}"/><stop offset="1" stop-color="{BG}"/>'
-             f'</linearGradient></defs>')
-
-parts.append(f'<rect width="{CANVAS_W}" height="{CANVAS_H}" rx="12" fill="url(#bg)"/>')
+parts.append(f'<rect width="{CANVAS_W}" height="{CANVAS_H}" rx="12" fill="{BG}"/>')
 parts.append(f'<rect x="0.5" y="0.5" width="{CANVAS_W-1}" height="{CANVAS_H-1}" rx="12" '
              f'fill="none" stroke="{FRAME}" stroke-width="1"/>')
 
